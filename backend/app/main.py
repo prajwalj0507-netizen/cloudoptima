@@ -79,6 +79,10 @@ if os.path.exists(static_dir):
     def serve_root():
         return FileResponse(os.path.join(static_dir, "index.html"))
 
+    @app.get("/favicon.ico", include_in_schema=False)
+    def serve_favicon():
+        return FileResponse(os.path.join(static_dir, "favicon.ico"))
+
     @app.get("/layer1", include_in_schema=False)
     def serve_layer1():
         f = os.path.join(static_dir, "layer1.html")
