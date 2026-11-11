@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Layer 1: Dashboard & Governance | CloudOptima</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { background-color: #0B0F19; color: #E2E8F0; font-family: system-ui, -apple-system, sans-serif; }
+    .glass-card { background: rgba(17, 24, 39, 0.85); border: 1px solid #1F2937; border-radius: 12px; }
+    .nav-link.active { border-bottom: 2px solid #6366F1; color: #6366F1; font-weight: 700; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Top Global Header -->
+  <header class="border-b border-gray-800 bg-gray-900/90 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <span class="text-2xl">☁️</span>
+        <div>
+          <span class="font-bold text-lg text-white">CloudOptima</span>
+          <span class="text-xs px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400 border border-indigo-500/40 ml-2">7-Layer Architecture</span>
+        </div>
+      </div>
+      <div class="flex items-center space-x-4">
+        <div class="flex items-center space-x-2 text-xs bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-700">
+          <span class="text-gray-400">Currency:</span>
+          <span class="font-bold text-emerald-400">₹ INR (85.0/$)</span>
+        </div>
+        <div class="flex items-center space-x-2 text-xs bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-700">
+          <span class="text-gray-400">Role:</span>
+          <span id="role-pill" class="font-bold text-cyan-400">Admin</span>
+        </div>
+        <button onclick="toggleRole()" class="text-xs px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-white font-medium transition">
+          Switch to Approver
+        </button>
+        <button onclick="triggerScan()" class="text-xs px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 rounded text-white font-semibold transition flex items-center space-x-1">
+          <span>⚡ Run Scan</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 7 Layer Navigation Tabs -->
+    <nav class="border-t border-gray-800/80 bg-gray-950/80 px-4 overflow-x-auto">
+      <div class="max-w-7xl mx-auto flex space-x-6 text-sm py-2">
+        <a href="/layer1" class="nav-link active pb-1 text-white hover:text-indigo-400 transition flex items-center space-x-1">
+          <span class="text-indigo-400 font-bold">1.</span> <span>Dashboard & Auth</span>
+        </a>
+        <a href="/layer2" class="nav-link pb-1 text-gray-400 hover:text-indigo-400 transition flex items-center space-x-1">
+          <span class="text-indigo-400 font-bold">2.</span> <span>Ingestion & FOCUS Data</span>
+        </a>
+        <a href="/layer3" class="nav-link pb-1 text-gray-400 hover:text-indigo-400 transition flex items-center space-x-1">
+          <span class="text-indigo-400 font-bold">3.</span> <span>Normalizer</span>
+        </a>
+        <a href="/layer4" class="nav-link pb-1 text-gray-400 hover:text-indigo-400 transition flex items-center space-x-1">
+          <span class="text-indigo-400 font-bold">4.</span> <span>Detection & ML</span>
+        </a>
+        <a href="/layer5" class="nav-link pb-1 text-gray-400 hover:text-indigo-400 transition flex items-center space-x-1">
+          <span class="text-indigo-400 font-bold">5.</span> <span>Risk Classifier</span>
+        </a>
+        <a href="/layer6" class="nav-link pb-1 text-gray-400 hover:text-indigo-400 transition flex items-center space-x-1">
+          <span class="text-indigo-400 font-bold">6.</span> <span>Execution & Rollback</span>
+        </a>
+        <a href="/layer7" class="nav-link pb-1 text-gray-400 hover:text-indigo-400 transition flex items-center space-x-1">
+          <span class="text-indigo-400 font-bold">7.</span> <span>Audit & Persistence</span>
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Page Content -->
+  <main class="max-w-7xl mx-auto px-4 py-8 flex-1 w-full space-y-6">
+
+    <!-- Layer 1 Header Card -->
+    <div class="glass-card p-6 border-l-4 border-l-indigo-500 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div>
+        <div class="text-xs font-bold text-indigo-400 tracking-wider uppercase mb-1">Layer 1 Specification</div>
+        <h1 class="text-2xl font-extrabold text-white">Dashboard, API Gateway & Role-Based Governance</h1>
+        <p class="text-sm text-gray-400 mt-1">
+          Exposes FastAPI asynchronous REST endpoints, manages JWT Role-Based Access Control (Admin vs Governance Approver),
+          and renders centralized FinOps financial metrics in Indian Rupees (₹).
+        </p>
+      </div>
+      <div class="flex items-center space-x-3">
+        <a href="/docs" target="_blank" class="text-xs px-3 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded text-cyan-400 font-semibold transition">
+          📄 Swagger Docs
+        </a>
+        <button onclick="reSeedDemo()" class="text-xs px-3 py-2 bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/40 rounded text-emerald-300 font-semibold transition">
+          🔄 Seed Multi-Cloud Fleet
+        </button>
+      </div>
+    </div>
+
+    <!-- 4 High-Level FinOps KPIs -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="glass-card p-5">
+        <div class="text-xs font-semibold text-gray-400 uppercase">Total Monthly Cloud Spend</div>
+        <div class="text-2xl font-bold text-white mt-1" id="kpi-spend">₹1,18,575.00</div>
+        <div class="text-xs text-gray-500 mt-1">AWS + Azure + GCP fleet total</div>
+      </div>
+      <div class="glass-card p-5 border-l-2 border-l-emerald-500">
+        <div class="text-xs font-semibold text-emerald-400 uppercase">Recoverable Monthly Waste</div>
+        <div class="text-2xl font-bold text-emerald-400 mt-1" id="kpi-waste">₹58,480.00</div>
+        <div class="text-xs text-emerald-500/80 mt-1">49.3% potential financial savings</div>
+      </div>
+      <div class="glass-card p-5 border-l-2 border-l-amber-500">
+        <div class="text-xs font-semibold text-amber-400 uppercase">Pending Governance Approvals</div>
+        <div class="text-2xl font-bold text-amber-400 mt-1" id="kpi-approvals">4 Actions</div>
+        <div class="text-xs text-amber-500/80 mt-1">High & Medium risk held for review</div>
+      </div>
+      <div class="glass-card p-5 border-l-2 border-l-cyan-500">
+        <div class="text-xs font-semibold text-cyan-400 uppercase">Connected Cloud Accounts</div>
+        <div class="text-2xl font-bold text-cyan-400 mt-1" id="kpi-accounts">3 Providers</div>
+        <div class="text-xs text-cyan-500/80 mt-1">AWS (boto3) • Azure • GCP</div>
+      </div>
+    </div>
+
+    <!-- RBAC & Persona Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      
+      <!-- Admin Persona Card -->
+      <div class="glass-card p-6 border-t-2 border-t-indigo-500">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center space-x-2">
+            <span class="text-lg">🛠️</span>
+            <h2 class="text-lg font-bold text-white">Role 1: Cloud Operations Admin</h2>
+          </div>
+          <span class="text-xs bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded border border-indigo-500/30 font-semibold">admin / admin123</span>
+        </div>
+        <p class="text-xs text-gray-400 mb-4">
+          Engineered for Cloud Infrastructure Engineers and FinOps Leads responsible for cloud onboarding, full fleet visibility, and pipeline triggering.
+        </p>
+        <ul class="text-xs text-gray-300 space-y-2">
+          <li class="flex items-center space-x-2"><span class="text-indigo-400 font-bold">✓</span><span>Full access to Multi-Cloud Inventory and Data Usage Telemetry</span></li>
+          <li class="flex items-center space-x-2"><span class="text-indigo-400 font-bold">✓</span><span>Trigger manual 7-layer scans & dynamic leak synthesis</span></li>
+          <li class="flex items-center space-x-2"><span class="text-indigo-400 font-bold">✓</span><span>Inspect all 4 waste rules and Isolation Forest ML cost spikes</span></li>
+          <li class="flex items-center space-x-2"><span class="text-indigo-400 font-bold">✓</span><span>Execute dry-run simulations before live mutations</span></li>
+        </ul>
+      </div>
+
+      <!-- Approver Persona Card -->
+      <div class="glass-card p-6 border-t-2 border-t-amber-500">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center space-x-2">
+            <span class="text-lg">🛡️</span>
+            <h2 class="text-lg font-bold text-white">Role 2: Governance Approver</h2>
+          </div>
+          <span class="text-xs bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded border border-amber-500/30 font-semibold">approver / approver123</span>
+        </div>
+        <p class="text-xs text-gray-400 mb-4">
+          Dedicated governance view shielding production environments from automated destruction by enforcing human sign-off on high-risk actions.
+        </p>
+        <ul class="text-xs text-gray-300 space-y-2">
+          <li class="flex items-center space-x-2"><span class="text-amber-400 font-bold">✓</span><span>Direct landing on the Human Approval Queue</span></li>
+          <li class="flex items-center space-x-2"><span class="text-amber-400 font-bold">✓</span><span>Inspect 4-factor risk breakdown (Environment, Topology, Action, Confidence)</span></li>
+          <li class="flex items-center space-x-2"><span class="text-amber-400 font-bold">✓</span><span>Authorize remediation with mandatory pre-action snapshot backup</span></li>
+          <li class="flex items-center space-x-2"><span class="text-amber-400 font-bold">✓</span><span>1-Click instant rollback restoration from snapshot in case of alert</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Interactive API Endpoint Explorer -->
+    <div class="glass-card p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-lg font-bold text-white">Interactive REST API Gateway</h2>
+          <p class="text-xs text-gray-400 mt-0.5">Click any endpoint to execute and inspect the live JSON response from the FastAPI backend.</p>
+        </div>
+        <span class="text-xs text-gray-500">Base URL: http://localhost:8000/api/v1</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+        <button onclick="testApi('/api/accounts')" class="text-xs text-left p-3 rounded bg-gray-800/80 hover:bg-gray-800 border border-gray-700 text-gray-300 font-mono transition">
+          <span class="text-emerald-400 font-bold">GET</span> /api/accounts
+        </button>
+        <button onclick="testApi('/api/resources/telemetry/summary')" class="text-xs text-left p-3 rounded bg-gray-800/80 hover:bg-gray-800 border border-gray-700 text-gray-300 font-mono transition">
+          <span class="text-emerald-400 font-bold">GET</span> /api/resources/summary
+        </button>
+        <button onclick="testApi('/api/findings')" class="text-xs text-left p-3 rounded bg-gray-800/80 hover:bg-gray-800 border border-gray-700 text-gray-300 font-mono transition">
+          <span class="text-emerald-400 font-bold">GET</span> /api/findings
+        </button>
+        <button onclick="testApi('/api/focus/summary')" class="text-xs text-left p-3 rounded bg-gray-800/80 hover:bg-gray-800 border border-gray-700 text-gray-300 font-mono transition">
+          <span class="text-emerald-400 font-bold">GET</span> /api/focus/summary
+        </button>
+      </div>
+
+      <div class="bg-gray-950 p-4 rounded-lg border border-gray-800 font-mono text-xs overflow-x-auto max-h-60" id="api-output">
+        <span class="text-gray-500">// Live API response will appear here when an endpoint is selected...</span>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="border-t border-gray-800 py-4 text-center text-xs text-gray-500">
+    CloudOptima FinOps Governance Platform &bull; Layer 1: Presentation & API &bull; 1 USD = ₹85.0
+  </footer>
+
+  <script>
+    let currentRole = "admin";
+
+    function toggleRole() {
+      currentRole = currentRole === "admin" ? "approver" : "admin";
+      document.getElementById("role-pill").textContent = currentRole === "admin" ? "Admin" : "Approver";
+      document.getElementById("role-pill").className = currentRole === "admin" 
+        ? "font-bold text-cyan-400" 
+        : "font-bold text-amber-400";
+    }
+
+    async function triggerScan() {
+      const output = document.getElementById("api-output");
+      output.textContent = "Initiating multi-cloud scan across AWS, Azure, GCP...";
+      try {
+        const res = await fetch("/api/demo/seed", { method: "POST" });
+        const data = await res.json();
+        output.textContent = JSON.stringify(data, null, 2);
+        loadKpis();
+      } catch (e) {
+        output.textContent = "Error: " + e;
+      }
+    }
+
+    async function reSeedDemo() {
+      triggerScan();
+    }
+
+    async function testApi(endpoint) {
+      const output = document.getElementById("api-output");
+      output.textContent = `Fetching ${endpoint}...`;
+      try {
+        const res = await fetch(endpoint);
+        const data = await res.json();
+        output.textContent = JSON.stringify(data, null, 2);
+      } catch (e) {
+        output.textContent = "Error: " + e;
+      }
+    }
+
+    async function loadKpis() {
+      try {
+        const res = await fetch("/api/resources/telemetry/summary");
+        if (res.ok) {
+          const d = await res.json();
+          document.getElementById("kpi-spend").textContent = `₹${(d.total_monthly_spend_usd * 85).toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+        }
+      } catch (e) {}
+    }
+
+    loadKpis();
+  </script>
+</body>
+</html>

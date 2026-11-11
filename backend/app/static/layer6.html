@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Layer 6: Execution & Rollback | CloudOptima</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background-color: #0B0F19; color: #E2E8F0; font-family: system-ui, -apple-system, sans-serif; }
+    .glass-card { background: rgba(17, 24, 39, 0.85); border: 1px solid #1F2937; border-radius: 12px; }
+    .nav-link.active { border-bottom: 2px solid #6366F1; color: #6366F1; font-weight: 700; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Top Global Header -->
+  <header class="border-b border-gray-800 bg-gray-900/90 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <span class="text-2xl">☁️</span>
+        <div>
+          <span class="font-bold text-lg text-white">CloudOptima</span>
+          <span class="text-xs px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400 border border-indigo-500/40 ml-2">7-Layer Architecture</span>
+        </div>
+      </div>
+      <div class="flex items-center space-x-4">
+        <div class="text-xs bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-700">
+          <span class="text-gray-400">Safety Guarantee:</span>
+          <span class="font-bold text-emerald-400">Mandatory Snapshots</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7 Layer Navigation Tabs -->
+    <nav class="border-t border-gray-800/80 bg-gray-950/80 px-4 overflow-x-auto">
+      <div class="max-w-7xl mx-auto flex space-x-6 text-sm py-2">
+        <a href="/layer1" class="nav-link pb-1 text-gray-400 hover:text-indigo-400 transition flex items-center space-x-1">
+          <span class="text-indigo-400 font-bold">1.</span> <span>Dashboard & Auth</span>
+        </a>
+        <a href="/layer2" class="nav-link pb-1 text-gray-400 hover:text-indigo-400 transition flex items-center space-x-1">
+          <span class="text-indigo-400 font-bold">2.</span> <span>Ingestion & FOCUS Data</span>
+        </a>
+        <a href="/layer3" class="nav-link pb-1 text-gray-400 hover:text-indigo-400 transition flex items-center space-x-1">
+          <span class="text-indigo-400 font-bold">3.</span> <span>Normalizer</span>
+        </a>
+        <a href="/layer4" class="nav-link pb-1 text-gray-400 hover:text-indigo-400 transition flex items-center space-x-1">
+          <span class="text-indigo-400 font-bold">4.</span> <span>Detection & ML</span>
+        </a>
+        <a href="/layer5" class="nav-link pb-1 text-gray-400 hover:text-indigo-400 transition flex items-center space-x-1">
+          <span class="text-indigo-400 font-bold">5.</span> <span>Risk Classifier</span>
+        </a>
+        <a href="/layer6" class="nav-link active pb-1 text-white hover:text-indigo-400 transition flex items-center space-x-1">
+          <span class="text-indigo-400 font-bold">6.</span> <span>Execution & Rollback</span>
+        </a>
+        <a href="/layer7" class="nav-link pb-1 text-gray-400 hover:text-indigo-400 transition flex items-center space-x-1">
+          <span class="text-indigo-400 font-bold">7.</span> <span>Audit & Persistence</span>
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-4 py-8 flex-1 w-full space-y-6">
+
+    <!-- Header Description Card -->
+    <div class="glass-card p-6 border-l-4 border-l-emerald-500">
+      <div class="text-xs font-bold text-emerald-400 tracking-wider uppercase mb-1">Layer 6 Specification</div>
+      <h1 class="text-2xl font-extrabold text-white">Safe Execution Engine: Snapshots, Verifier & 1-Click Rollback</h1>
+      <p class="text-sm text-gray-400 mt-1">
+        Ensures zero accidental downtime through dry-run simulation, immutable pre-action snapshot creation, post-action API state verification,
+        and instant 1-click snapshot restoration.
+      </p>
+    </div>
+
+    <!-- 5-Step Safety State Machine Tracker -->
+    <div class="glass-card p-6">
+      <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Governed Safety State Machine</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-5 gap-3">
+        <div class="p-3 bg-gray-950 border border-gray-800 rounded-lg text-center">
+          <div class="text-xs font-bold text-cyan-400">1. Dry-Run</div>
+          <p class="text-[11px] text-gray-400 mt-1">Simulates API connectivity and IAM permissions</p>
+        </div>
+        <div class="p-3 bg-gray-950 border border-indigo-500/40 rounded-lg text-center">
+          <div class="text-xs font-bold text-indigo-400">2. Snapshot Backup</div>
+          <p class="text-[11px] text-gray-400 mt-1">Creates immutable snapshot ID before mutation</p>
+        </div>
+        <div class="p-3 bg-gray-950 border border-amber-500/40 rounded-lg text-center">
+          <div class="text-xs font-bold text-amber-400">3. Execution</div>
+          <p class="text-[11px] text-gray-400 mt-1">Mutates resource via authorized cloud API</p>
+        </div>
+        <div class="p-3 bg-gray-950 border border-emerald-500/40 rounded-lg text-center">
+          <div class="text-xs font-bold text-emerald-400">4. API Verifier</div>
+          <p class="text-[11px] text-gray-400 mt-1">Probes resource state to verify completion</p>
+        </div>
+        <div class="p-3 bg-gray-950 border border-rose-500/40 rounded-lg text-center">
+          <div class="text-xs font-bold text-rose-400">5. 1-Click Rollback</div>
+          <p class="text-[11px] text-gray-400 mt-1">Instant restore from snapshot if alert triggers</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Human Approval Queue -->
+    <div class="glass-card p-6">
+      <div class="flex justify-between items-center mb-4">
+        <div>
+          <h2 class="text-lg font-bold text-white flex items-center space-x-2">
+            <span>🛡️</span> <span>Governance Approver Queue (High & Medium Risk Workloads)</span>
+          </h2>
+          <p class="text-xs text-gray-400 mt-0.5">Actions held pending human authorization by Security & DevOps leads.</p>
+        </div>
+        <span class="text-xs bg-amber-500/20 text-amber-400 px-3 py-1 rounded font-semibold border border-amber-500/30">
+          Governance Approver Role
+        </span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="bg-gray-950 text-gray-400 border-b border-gray-800">
+              <th class="p-3">Resource ID</th>
+              <th class="p-3">Proposed Action</th>
+              <th class="p-3">Risk Score</th>
+              <th class="p-3">Monthly Savings (₹)</th>
+              <th class="p-3">Blast Radius Notes</th>
+              <th class="p-3 text-right">Governance Authorization</th>
+            </tr>
+          </thead>
+          <tbody id="approvals-tbody" class="divide-y divide-gray-800 font-mono text-xs">
+            <!-- Dynamic approval items inserted here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pre-Action Snapshot Vault & Rollback Simulator -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      
+      <!-- Snapshot Vault -->
+      <div class="glass-card p-6">
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="text-sm font-bold text-white flex items-center space-x-2">
+            <span>💾</span> <span>Pre-Action Snapshot Vault</span>
+          </h3>
+          <span class="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded border border-indigo-500/30">Active Backups</span>
+        </div>
+        <p class="text-xs text-gray-400 mb-4">
+          All storage volumes deleted or modified have verified snapshot IDs stored prior to mutation:
+        </p>
+
+        <div class="space-y-2 font-mono text-xs" id="snapshot-list">
+          <div class="p-3 bg-gray-950 rounded border border-gray-800 flex justify-between items-center">
+            <div>
+              <div class="font-bold text-cyan-400">snap-20261026-ca410b</div>
+              <div class="text-[11px] text-gray-400 mt-0.5">Parent: vol-0941bc4e27f10 (500 GB EBS)</div>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded">Verified Ready</span>
+          </div>
+          <div class="p-3 bg-gray-950 rounded border border-gray-800 flex justify-between items-center">
+            <div>
+              <div class="font-bold text-cyan-400">snap-20261026-backup81</div>
+              <div class="text-[11px] text-gray-400 mt-0.5">Parent: disk-data-stage-backup (1024 GB Azure)</div>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded">Verified Ready</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rollback Simulator Panel -->
+      <div class="glass-card p-6 border-t-2 border-t-rose-500">
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="text-sm font-bold text-white flex items-center space-x-2">
+            <span>⏪</span> <span>1-Click Rollback Simulator</span>
+          </h3>
+          <span class="text-[10px] bg-rose-500/20 text-rose-400 px-2 py-0.5 rounded border border-rose-500/30">Disaster Recovery</span>
+        </div>
+        <p class="text-xs text-gray-400 mb-4">
+          Simulate an accidental dependency alert to demonstrate CloudOptima's 1-click snapshot restore:
+        </p>
+
+        <div class="p-4 bg-gray-950 rounded-lg border border-gray-800 space-y-3">
+          <div class="text-xs">
+            <span class="text-gray-400">Target to Revert:</span>
+            <span class="font-mono text-white ml-2 font-bold">vol-0941bc4e27f10 (Status: DELETED)</span>
+          </div>
+          <div class="text-xs">
+            <span class="text-gray-400">Restore Point:</span>
+            <span class="font-mono text-cyan-400 ml-2 font-bold">snap-20261026-ca410b (100% Intact)</span>
+          </div>
+          <button onclick="triggerRollbackDemo()" id="rollback-btn" class="w-full text-xs py-2.5 px-4 bg-rose-600 hover:bg-rose-500 rounded text-white font-bold transition flex justify-center items-center space-x-1">
+            <span>⏪ Execute 1-Click Snapshot Restore</span>
+          </button>
+          <div id="rollback-status" class="text-[11px] font-mono text-gray-400 text-center hidden"></div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="border-t border-gray-800 py-4 text-center text-xs text-gray-500">
+    CloudOptima FinOps Governance Platform &bull; Layer 6: Safe Execution & Rollback &bull; 1 USD = ₹85.0
+  </footer>
+
+  <script>
+    async function loadApprovals() {
+      try {
+        const res = await fetch("/api/approvals");
+        const approvals = await res.json();
+        const tbody = document.getElementById("approvals-tbody");
+        tbody.innerHTML = "";
+
+        if (approvals.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-gray-500">No pending approvals! All high-risk workloads have been reviewed.</td></tr>`;
+          return;
+        }
+
+        approvals.forEach(a => {
+          const tr = document.createElement("tr");
+          tr.className = "hover:bg-gray-800/40 transition";
+          const finding = a.finding;
+          const savingsInr = (finding.estimated_monthly_saving * 85).toLocaleString('en-IN', {minimumFractionDigits: 2});
+
+          tr.innerHTML = `
+            <td class="p-3 text-cyan-400 font-bold">${finding.resource_id}</td>
+            <td class="p-3 text-gray-300">${finding.recommended_action}</td>
+            <td class="p-3 font-bold text-rose-400">${finding.risk_score.toFixed(1)} (${finding.risk_level})</td>
+            <td class="p-3 text-emerald-400 font-semibold">₹${savingsInr}</td>
+            <td class="p-3 text-gray-400 text-[11px] max-w-xs truncate">${a.decision_notes || 'Review blast radius'}</td>
+            <td class="p-3 text-right space-x-2">
+              <button onclick="approveAction(${a.id})" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-semibold transition text-[11px]">
+                Approve (with Snapshot)
+              </button>
+              <button onclick="rejectAction(${a.id})" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded font-medium transition text-[11px]">
+                Reject
+              </button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+      } catch (e) {
+        console.error("Error loading approvals", e);
+      }
+    }
+
+    async function approveAction(approvalId) {
+      try {
+        const res = await fetch(`/api/approvals/${approvalId}/decision`, {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({decision: "approved", notes: "Authorized by DevOps Lead with pre-action snapshot."})
+        });
+        if (res.ok) {
+          alert("Action Approved! Mandatory pre-action snapshot created and verified.");
+          loadApprovals();
+        }
+      } catch (e) {
+        alert("Error approving action: " + e);
+      }
+    }
+
+    async function rejectAction(approvalId) {
+      try {
+        const res = await fetch(`/api/approvals/${approvalId}/decision`, {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({decision: "rejected", notes: "Rejected by operator."})
+        });
+        if (res.ok) {
+          alert("Action Rejected and logged to audit trail.");
+          loadApprovals();
+        }
+      } catch (e) {
+        alert("Error rejecting action: " + e);
+      }
+    }
+
+    function triggerRollbackDemo() {
+      const btn = document.getElementById("rollback-btn");
+      const status = document.getElementById("rollback-status");
+      btn.disabled = true;
+      btn.textContent = "Restoring volume from snapshot snap-20261026-ca410b...";
+      status.className = "text-[11px] font-mono text-cyan-400 text-center block";
+      status.textContent = "Probing Cloud API: Allocating disk from snapshot block storage...";
+
+      setTimeout(() => {
+        status.textContent = "API Verifier: Volume restored to state AVAILABLE. State integrity 100% verified!";
+        status.className = "text-[11px] font-mono text-emerald-400 text-center block font-bold";
+        btn.textContent = "✅ Rollback Completed Successfully";
+        btn.className = "w-full text-xs py-2.5 px-4 bg-emerald-600 rounded text-white font-bold";
+      }, 1500);
+    }
+
+    // Init
+    loadApprovals();
+  </script>
+</body>
+</html>

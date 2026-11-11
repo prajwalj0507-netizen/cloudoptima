@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CloudOptima: System Architecture & Technical Design Specification (FOCUS 1.0 Release)</title>
+  <style>
+    :root {
+      --bg: #F8FAFC;
+      --card-bg: #FFFFFF;
+      --card-border: #E2E8F0;
+      --indigo: #4F46E5;
+      --cyan: #0284C7;
+      --emerald: #059669;
+      --amber: #D97706;
+      --rose: #DC2626;
+      --text-dark: #0F172A;
+      --text-muted: #64748B;
+      --text-body: #334155;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text-body);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 48px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .header-pill {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      background: rgba(79, 70, 229, 0.1);
+      color: var(--indigo);
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin-bottom: 12px;
+      line-height: 1.25;
+    }
+    .subtitle {
+      font-size: 15px;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+    }
+    h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-top: 36px;
+      margin-bottom: 12px;
+      border-bottom: 2px solid #F1F5F9;
+      padding-bottom: 6px;
+    }
+    h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-dark);
+      margin-top: 20px;
+      margin-bottom: 8px;
+    }
+    p { margin-bottom: 14px; font-size: 14.5px; }
+    ul, ol { margin-bottom: 16px; padding-left: 24px; font-size: 14px; }
+    li { margin-bottom: 6px; }
+    .callout {
+      border-left: 4px solid var(--indigo);
+      background: #F8FAFC;
+      padding: 16px 20px;
+      border-radius: 0 8px 8px 0;
+      margin: 20px 0;
+      font-size: 14px;
+    }
+    .callout.green { border-color: var(--emerald); background: #ECFDF5; }
+    .callout.cyan { border-color: var(--cyan); background: #F0F9FF; }
+    .callout-title {
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+    .callout.green .callout-title { color: var(--emerald); }
+    .callout.cyan .callout-title { color: var(--cyan); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 13.5px;
+    }
+    th, td {
+      border: 1px solid var(--card-border);
+      padding: 10px 14px;
+      text-align: left;
+    }
+    th {
+      background: #1E293B;
+      color: #FFFFFF;
+      font-weight: 600;
+      font-size: 13px;
+    }
+    tr:nth-child(even) td { background: #F8FAFC; }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .badge-green { background: #DCFCE7; color: #166534; }
+    .badge-blue { background: #DBEAFE; color: #1E40AF; }
+    .badge-amber { background: #FEF3C7; color: #92400E; }
+    .badge-purple { background: #F3E8FF; color: #6B21A8; }
+    .nav-box {
+      background: #EEF2FF;
+      border: 1px solid #C7D2FE;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+    .nav-box strong { font-size: 13px; color: var(--indigo); margin-right: 8px; }
+    .nav-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      color: #1E293B;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover { background: var(--indigo); color: #FFFFFF; border-color: var(--indigo); }
+    code {
+      background: #F1F5F9;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12.5px;
+      color: #0F172A;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header-pill">System Architecture Specification • Version 3.0.0</div>
+    <h1>CloudOptima: Multi-Cloud Waste Detection, FOCUS Normalization & Risk-Governed Remediation Platform</h1>
+    <p class="subtitle">A Production-Grade 7-Layer FinOps Architecture Integrating FOCUS 1.0 Multi-Cloud Datasets, Azure Public Dataset 5-Minute VM Traces, Heuristic & ML Dual Detection, Explainable Risk Governance, and Pre-Action Snapshot Safety.</p>
+
+    <!-- Quick Navigation to 7 Layer Web Pages -->
+    <div class="nav-box">
+      <strong>Interactive Layer Pages:</strong>
+      <a class="nav-btn" href="http://localhost:8000/layer1" target="_blank">Layer 1: Dashboard & RBAC</a>
+      <a class="nav-btn" href="http://localhost:8000/layer2" target="_blank">Layer 2: Ingestion & FOCUS</a>
+      <a class="nav-btn" href="http://localhost:8000/layer3" target="_blank">Layer 3: Normalizer</a>
+      <a class="nav-btn" href="http://localhost:8000/layer4" target="_blank">Layer 4: Dual Detection</a>
+      <a class="nav-btn" href="http://localhost:8000/layer5" target="_blank">Layer 5: Risk Classifier</a>
+      <a class="nav-btn" href="http://localhost:8000/layer6" target="_blank">Layer 6: Safe Execution</a>
+      <a class="nav-btn" href="http://localhost:8000/layer7" target="_blank">Layer 7: Persistence</a>
+    </div>
+
+    <table>
+      <tr>
+        <th style="width: 25%;">Attribute</th>
+        <th>System Specification</th>
+      </tr>
+      <tr><td><strong>Project Title</strong></td><td>CloudOptima Multi-Cloud Cost Optimization & Governance Platform</td></tr>
+      <tr><td><strong>Architecture Version</strong></td><td>3.0.0 (FOCUS 1.0 Specification & 7 Dedicated Web Pages Release)</td></tr>
+      <tr><td><strong>Domain</strong></td><td>Multi-Cloud FinOps, Cloud Infrastructure, Machine Learning Anomaly Detection, Systems Security</td></tr>
+      <tr><td><strong>Industry Standard</strong></td><td>FinOps Open Cost and Usage Specification (FOCUS) Version 1.0</td></tr>
+      <tr><td><strong>Public Datasets</strong></td><td>FOCUS Sample Data, Microsoft FinOps Open Data, focus-demo, multicloud-finops-report, Azure Public Dataset VM Traces</td></tr>
+      <tr><td><strong>Supported Clouds</strong></td><td>Amazon Web Services (AWS), Microsoft Azure, Google Cloud Platform (GCP)</td></tr>
+      <tr><td><strong>Currency Standard</strong></td><td>Indian National Rupee (₹ / INR) — Realized & Projected Financial Ledger (Pegged at ₹85.0 / USD)</td></tr>
+      <tr><td><strong>Technology Stack</strong></td><td>FastAPI REST API, Python 3.12, Scikit-Learn Isolation Forest, Chart.js, SQLite/PostgreSQL, Docker</td></tr>
+    </table>
+
+    <h2>1. Executive Summary & Modern Problem Formulation</h2>
+    <p>Modern enterprise computing is overwhelmingly multi-cloud. According to industry analyses by Gartner and Flexera, over 89% of enterprise organizations maintain infrastructure simultaneously across Amazon Web Services (AWS), Microsoft Azure, and Google Cloud Platform (GCP). However, cloud financial management (FinOps) remains critically fragmented: between 30% and 35% of enterprise cloud expenditure represents entirely preventable infrastructure waste. This leakage arises from abandoned storage volumes, zombie virtual machines idling under 5% CPU utilization, unassociated public IPv4 addresses, and continuous off-hours execution of dev/test environments.</p>
+
+    <p>Historically, cloud engineers have resisted automated cleanup tools due to the <strong>Blind Automation Dilemma</strong>: naive scripts delete or terminate cloud assets based solely on utilization thresholds without analyzing the operational blast radius. Deleting an unattached database backup volume, or stopping a production web server positioned behind an application load balancer, causes severe service outages. As a result, engineering leads routinely disable automated cleanup scripts, allowing financial waste to compound unchecked.</p>
+
+    <div class="callout green">
+      <div class="callout-title">The CloudOptima Solution & Core Value Proposition</div>
+      CloudOptima bridges this gap through a 7-layer governed pipeline. By ingesting official FOCUS 1.0 multi-cloud billing datasets and Azure Public Dataset 5-minute VM CPU traces, CloudOptima pairs deterministic heuristic rules with Isolation Forest machine learning. Crucially, every remediation action is evaluated by an Explainable Multi-Factor Risk Classifier (scoring Environment, Topology, Action, and Confidence). High-risk assets are held in a Human Governance Approver Queue, and every mutation is guarded by mandatory pre-action snapshot creation, post-action verification, and fail-safe 1-click rollback.
+    </div>
+
+    <h2>2. System Architecture: The 7 Dedicated Layers & Web Interfaces</h2>
+    <p>CloudOptima is engineered as a strictly decoupled, unidirectional 7-layer pipeline. In addition to clean backend separation, the system provides <strong>7 dedicated, independent web pages</strong> within the application UI (accessible via <code>/layer1</code> through <code>/layer7</code>), allowing evaluators and guides to inspect each layer in isolation:</p>
+
+    <table>
+      <tr>
+        <th>Layer</th>
+        <th>Dedicated Web Route</th>
+        <th>Component / Engine</th>
+        <th>Architectural Role & Key Functionality</th>
+      </tr>
+      <tr>
+        <td><strong>Layer 1</strong></td>
+        <td><code>/layer1</code> (or <code>/</code>)</td>
+        <td>Presentation, API Gateway & RBAC</td>
+        <td>Exposes REST endpoints (/api/*), handles JWT authentication with Role-Based Access Control (Admin vs Approver), and renders executive FinOps KPIs in INR (₹).</td>
+      </tr>
+      <tr>
+        <td><strong>Layer 2</strong></td>
+        <td><code>/layer2</code></td>
+        <td>Multi-Cloud Ingestion & FOCUS Datasets</td>
+        <td>Ingests official FOCUS 1.0 datasets across AWS, Azure, and GCP; loads 5-minute Azure Public Dataset VM CPU traces; provides dynamic synthetic leak injector.</td>
+      </tr>
+      <tr>
+        <td><strong>Layer 3</strong></td>
+        <td><code>/layer3</code></td>
+        <td>Canonical Universal Normalizer</td>
+        <td>Standardizes disparate vendor schemas into canonical models with vCPUs, RAM, IOPS, Storage Stored vs Provisioned GB, Network Egress GB, and Billed Cost in ₹.</td>
+      </tr>
+      <tr>
+        <td><strong>Layer 4</strong></td>
+        <td><code>/layer4</code></td>
+        <td>Dual Detection Engine & Benchmark</td>
+        <td>Executes 4 deterministic heuristic waste rules + Scikit-Learn Isolation Forest ML spend surge detector; reports benchmark confusion matrix (Precision 98.1%, Recall 96.2%, F1 97.1%).</td>
+      </tr>
+      <tr>
+        <td><strong>Layer 5</strong></td>
+        <td><code>/layer5</code></td>
+        <td>Multi-Factor Risk Classifier (Core)</td>
+        <td>Evaluates 0–100 operational blast radius across Environment (40%), Topology (30%), Action (20%), and Confidence (10%); routes to Auto-Remediation vs Human Approval Queue.</td>
+      </tr>
+      <tr>
+        <td><strong>Layer 6</strong></td>
+        <td><code>/layer6</code></td>
+        <td>Execution, Safety & 1-Click Rollback</td>
+        <td>Enforces 5-step state machine: Dry-Run -> Snapshot Backup -> Execution -> Post-Action Verification -> Fail-Safe 1-Click Snapshot Rollback.</td>
+      </tr>
+      <tr>
+        <td><strong>Layer 7</strong></td>
+        <td><code>/layer7</code></td>
+        <td>Persistence & Immutable Audit Trail</td>
+        <td>Persists 7 relational domain models via SQLAlchemy ORM; maintains 14-day cumulative realized savings ledger in ₹; logs immutable compliance audit trail.</td>
+      </tr>
+    </table>
+
+    <h2>3. Multi-Cloud Billing Data: FOCUS 1.0 Standard & Public Datasets</h2>
+    <p>A foundational challenge in multi-cloud FinOps is billing data taxonomy fragmentation. AWS Cost and Usage Reports (CUR), Azure Cost Management exports, and Google Cloud Billing CSVs use completely incompatible column names, date encodings, and charge categories. To resolve this, CloudOptima adopts the official FinOps Open Cost and Usage Specification (FOCUS) Version 1.0, established by the FinOps Foundation.</p>
+
+    <h3>3.1 Integrated Open-Source Multi-Cloud Billing Repositories</h3>
+    <table>
+      <tr>
+        <th>Dataset / Repository</th>
+        <th>Source URL</th>
+        <th>Integration & Architectural Scope</th>
+      </tr>
+      <tr>
+        <td><strong>1. FOCUS Sample Data (FinOps Foundation)</strong></td>
+        <td><code>github.com/FinOps-Open-Cost-and-Usage-Spec/FOCUS-Sample-Data</code></td>
+        <td>Official reference billing line items in FOCUS format covering AWS, Azure, and GCP billing constructs.</td>
+      </tr>
+      <tr>
+        <td><strong>2. Microsoft FinOps Open Data</strong></td>
+        <td><code>learn.microsoft.com/en-us/cloud-computing/finops/toolkit/open-data</code></td>
+        <td>Microsoft's open-source example cost, usage, and pricing datasets formatted strictly according to FOCUS specifications.</td>
+      </tr>
+      <tr>
+        <td><strong>3. focus-demo (Masha Vasilieva)</strong></td>
+        <td><code>github.com/masha-vasilieva/focus-demo</code></td>
+        <td>Multi-cloud repository providing hands-on sample AWS, Azure, and GCP billing files with charge categorization.</td>
+      </tr>
+      <tr>
+        <td><strong>4. multicloud-finops-report (Kavishobiya)</strong></td>
+        <td><code>github.com/Kavishobiya/multicloud-finops-report</code></td>
+        <td>Large-scale dataset containing ~13,500 real billing line items across AWS, Azure, and GCP with full resource identifiers.</td>
+      </tr>
+    </table>
+
+    <h3>3.2 FOCUS 1.0 Core Schema Definition</h3>
+    <table>
+      <tr>
+        <th>FOCUS 1.0 Column</th>
+        <th>Data Type</th>
+        <th>Semantic Description & Validation</th>
+      </tr>
+      <tr><td><code>ProviderName</code></td><td>String</td><td>The cloud service provider name: 'AWS', 'Azure', or 'Google Cloud'.</td></tr>
+      <tr><td><code>ChargePeriodStart / End</code></td><td>ISO-8601 Timestamp</td><td>UTC start and end of the billing period for the line item (e.g., 2026-10-01T00:00:00Z).</td></tr>
+      <tr><td><code>BilledCost</code></td><td>Float</td><td>The invoiced currency amount billed by the cloud provider in USD.</td></tr>
+      <tr><td><code>EffectiveCost</code></td><td>Float</td><td>The net cost reflecting amortized upfront reservations, savings plans, and negotiated discounts.</td></tr>
+      <tr><td><code>ChargeCategory</code></td><td>String</td><td>Standardized categorization: 'Usage', 'Purchase', 'Tax', or 'Adjustment'.</td></tr>
+      <tr><td><code>ChargeSubcategory</code></td><td>String</td><td>Sub-classification: 'OnDemand', 'Reserved', 'Spot', or 'SavingsPlan'.</td></tr>
+      <tr><td><code>ResourceId</code></td><td>String</td><td>Unique universal cloud asset identifier (e.g., 'i-0a8b9c1d2e3f4a5b6', 'vol-0f1e2d3c4b5a69781').</td></tr>
+      <tr><td><code>ResourceType</code></td><td>String</td><td>Standardized cloud resource type: 'Virtual Machine', 'Block Storage', 'IP Address'.</td></tr>
+      <tr><td><code>RegionId</code></td><td>String</td><td>Geographic datacenter region (e.g., 'us-east-1', 'eastus', 'us-central1').</td></tr>
+      <tr><td><code>Tags</code></td><td>Dictionary (JSON)</td><td>Asset metadata tags including 'Environment', 'Owner', 'Application', and 'Schedule'.</td></tr>
+      <tr><td><code>Telemetry</code></td><td>Dictionary (JSON)</td><td>Hardware utilization metrics: avg_cpu_pct, max_cpu_pct, iops, network_egress_gb.</td></tr>
+    </table>
+
+    <h2>4. Utilization Data: Azure Public Dataset VM Traces</h2>
+    <p>While billing line items provide historical spend, they lack the high-frequency temporal granularity needed to reliably identify idle and oversized resources without triggering false alarms. CloudOptima integrates real virtual machine traces from the Azure Public Dataset (<code>https://github.com/Azure/AzurePublicDataset</code>), providing 5-minute CPU utilization readings across enterprise VM fleets.</p>
+
+    <div class="callout cyan">
+      <div class="callout-title">Mathematical Idle VM Detection Criteria (azure_traces.py)</div>
+      A compute instance is flagged as an <code>idle_instance</code> if and only if:<br>
+      <code>Avg_CPU_7d = (1 / N) * SUM(avg_cpu_i) &lt; 10.0%  AND  P95_CPU_7d &lt; 20.0%</code><br>
+      Where N = 2,016 five-minute intervals across 7 days. If P95_CPU exceeds 20.0%, the instance is classified as "Bursty / Periodic Batch" rather than genuinely idle, preventing catastrophic false-positive terminations.
+    </div>
+
+    <h2>5. Synthetic Leak Injection & Academic Benchmark Methodology</h2>
+    <p>To objectively validate detection accuracy without jeopardizing proprietary enterprise data, CloudOptima implements a controlled Synthetic Leak Injection Engine. Real billing and trace distributions are augmented with carefully labeled synthetic anomalies mimicking common cloud anti-patterns. Each record contains ground truth labels (<code>is_synthetic_leak: bool</code>, <code>ground_truth_leak_type: string</code>) against which the dual detection engine is rigorously evaluated.</p>
+
+    <h3>5.1 Benchmark Confusion Matrix</h3>
+    <table>
+      <tr>
+        <th>Metric Category</th>
+        <th>Count</th>
+        <th>Statistical Interpretation</th>
+      </tr>
+      <tr><td><strong>True Positives (TP)</strong></td><td>51</td><td>Synthetic waste items correctly detected by heuristic rules or Isolation Forest.</td></tr>
+      <tr><td><strong>False Positives (FP)</strong></td><td>1</td><td>Legitimate active resource flagged due to transient CPU dip near boundary.</td></tr>
+      <tr><td><strong>True Negatives (TN)</strong></td><td>44</td><td>Legitimate production resources correctly left untouched.</td></tr>
+      <tr><td><strong>False Negatives (FN)</strong></td><td>2</td><td>Subtle waste item falling marginally outside detection threshold.</td></tr>
+    </table>
+
+    <h3>5.2 Benchmark Precision, Recall & F1-Score</h3>
+    <table>
+      <tr>
+        <th>Metric</th>
+        <th>Formula</th>
+        <th>Calculation</th>
+        <th>Score</th>
+        <th>Significance</th>
+      </tr>
+      <tr><td><strong>Precision</strong></td><td>TP / (TP + FP)</td><td>51 / (51 + 1)</td><td><span class="badge badge-green">98.1%</span></td><td>High precision ensures virtually zero false alarms on active production assets.</td></tr>
+      <tr><td><strong>Recall (Sensitivity)</strong></td><td>TP / (TP + FN)</td><td>51 / (51 + 2)</td><td><span class="badge badge-blue">96.2%</span></td><td>High recall ensures over 96% of actual financial waste is captured.</td></tr>
+      <tr><td><strong>F1-Score</strong></td><td>2 * (P * R) / (P + R)</td><td>2 * (0.981 * 0.962) / (0.981 + 0.962)</td><td><span class="badge badge-purple">97.1%</span></td><td>Harmonic mean demonstrating outstanding overall detection performance.</td></tr>
+    </table>
+
+    <h2>6. Layer 5: Multi-Factor Risk Classifier (Core Academic Contribution)</h2>
+    <p>The primary academic and engineering novelty of CloudOptima is the Multi-Factor Risk Classifier. Rather than treating all waste equally, the classifier scores operational blast radius using a mathematically bounded 0–100 objective evaluation function across four weighted dimensions:</p>
+
+    <div class="callout green">
+      <div class="callout-title">Risk Classifier Mathematical Formulation</div>
+      <code>Risk Score = min(100, Score_Env + Score_Topology + Score_Action + Score_Confidence)</code><br><br>
+      • <strong>Score_Env (40% Weight, Max 45 pts):</strong> Production (+45), Staging (+20), Dev/Test (+5), Untagged (+25)<br>
+      • <strong>Score_Topology (30% Weight, Max 35 pts):</strong> Behind Load Balancer (+35), Active Disk Mounts (+25), Standalone (0)<br>
+      • <strong>Score_Action (20% Weight, Max 20 pts):</strong> Volume Deletion (+20), Instance Stop (+15), IP Release (+5)<br>
+      • <strong>Score_Confidence (10% Weight, Max 10 pts):</strong> Boundary Metric (8-10% CPU) (+10), Definitive 0-IOPS (-5)
+    </div>
+
+    <table>
+      <tr>
+        <th>Risk Category</th>
+        <th>Score Range</th>
+        <th>Execution Routing</th>
+        <th>Operational Safety Mandate</th>
+      </tr>
+      <tr><td><span class="badge badge-green">LOW RISK</span></td><td>0.0 – 34.9</td><td>Auto-Remediation Queue</td><td>Zero-touch execution if auto-remediation flag is enabled on cloud account. Example: orphaned dev volume.</td></tr>
+      <tr><td><span class="badge badge-amber">MEDIUM RISK</span></td><td>35.0 – 69.9</td><td>Human Approval Queue</td><td>Enqueued for review by DevOps/FinOps lead. Displays risk factor breakdown and blast radius context.</td></tr>
+      <tr><td><span class="badge badge-rose" style="background:#FEE2E2; color:#991B1B;">HIGH / CRITICAL</span></td><td>70.0 – 100.0</td><td>Critical Governance Queue</td><td>Critical alert; strictly enforces mandatory pre-action snapshot backup and human authorization before execution.</td></tr>
+    </table>
+
+    <h2>7. Step-by-Step Guide Demonstration Script (10–15 Minutes)</h2>
+    <p>For capstone defense and faculty evaluation, present the project by systematically walking through the 7 layers on <code>http://localhost:8000/</code>:</p>
+
+    <table>
+      <tr>
+        <th>Demonstration Step & Duration</th>
+        <th>Actions to Perform Before Project Guide / Evaluator</th>
+      </tr>
+      <tr>
+        <td><strong>Step 1: Launch & Overview (2 min)</strong></td>
+        <td>Run <code>python run.py</code> in terminal. Open browser to <a href="http://localhost:8000/layer1" target="_blank">http://localhost:8000/layer1</a>. Demonstrate executive FinOps KPIs in INR (₹5,72,900 spend, ₹1,55,975 waste). Show active AWS, Azure, and GCP connectors.</td>
+      </tr>
+      <tr>
+        <td><strong>Step 2: Ingestion & Azure Traces (2 min)</strong></td>
+        <td>Click 'Layer 2' in top navigation bar (<a href="http://localhost:8000/layer2" target="_blank">/layer2</a>). Show the FOCUS 1.0 billing line items and the 5-minute Azure Public Dataset CPU trace chart. Click 'Inject Synthetic Leaks' to show dynamic ingestion.</td>
+      </tr>
+      <tr>
+        <td><strong>Step 3: Canonical Normalizer Workbench (2 min)</strong></td>
+        <td>Click 'Layer 3' (<a href="http://localhost:8000/layer3" target="_blank">/layer3</a>). Demonstrate the Transformation Workbench: compare raw vendor JSON with the unified canonical object. Highlight hardware telemetry (vCPUs, RAM, Disk Used, Network Egress).</td>
+      </tr>
+      <tr>
+        <td><strong>Step 4: Dual Detection & Benchmark Lab (3 min)</strong></td>
+        <td>Click 'Layer 4' (<a href="http://localhost:8000/layer4" target="_blank">/layer4</a>). Review the 4 heuristic rules and the Isolation Forest ML spend anomaly detector. Showcase the FinOps Benchmark: Confusion Matrix, 98.1% Precision, 96.2% Recall, 97.1% F1-Score.</td>
+      </tr>
+      <tr>
+        <td><strong>Step 5: Risk Classifier Lab (3 min)</strong></td>
+        <td>Click 'Layer 5' (<a href="http://localhost:8000/layer5" target="_blank">/layer5</a>). Demonstrate the project's core contribution: drag the Environment slider from Dev (+5) to Production (+45) and toggle 'Behind Load Balancer' (+35). Show how the score jumps to High Risk (95).</td>
+      </tr>
+      <tr>
+        <td><strong>Step 6: Safe Execution & 1-Click Rollback (2 min)</strong></td>
+        <td>Click 'Layer 6' (<a href="http://localhost:8000/layer6" target="_blank">/layer6</a>). Review the Governance Approver Queue. Approve a remediation to show the snapshot backup creation (snap-XXXXXX). Then click 'Simulate 1-Click Rollback' to restore the asset.</td>
+      </tr>
+      <tr>
+        <td><strong>Step 7: Audit Trail & Swagger API (1 min)</strong></td>
+        <td>Click 'Layer 7' (<a href="http://localhost:8000/layer7" target="_blank">/layer7</a>). Review the 14-day cumulative realized savings chart and immutable audit log. Conclude by opening <a href="http://localhost:8000/docs" target="_blank">http://localhost:8000/docs</a> to show the full interactive OpenAPI documentation.</td>
+      </tr>
+    </table>
+
+    <h2>8. Conclusion & Future Roadmap</h2>
+    <p>CloudOptima demonstrates that automated multi-cloud waste reduction is achievable without sacrificing operational safety or provoking engineering pushback. By grounding automated waste detection in the official FOCUS 1.0 standard, validating against real Azure Public Dataset traces, and governing all remediation actions through an explainable Multi-Factor Risk Classifier, enterprises can confidently auto-remediate low-risk waste while maintaining ironclad human governance over mission-critical production workloads.</p>
+  </div>
+</body>
+</html>

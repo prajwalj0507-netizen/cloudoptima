@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Layer 3: Canonical Normalizer | CloudOptima</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background-color: #0B0F19; color: #E2E8F0; font-family: system-ui, -apple-system, sans-serif; }
+    .glass-card { background: rgba(17, 24, 39, 0.85); border: 1px solid #1F2937; border-radius: 12px; }
+    .nav-link.active { border-bottom: 2px solid #6366F1; color: #6366F1; font-weight: 700; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Top Global Header -->
+  <header class="border-b border-gray-800 bg-gray-900/90 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <span class="text-2xl">☁️</span>
+        <div>
+          <span class="font-bold text-lg text-white">CloudOptima</span>
+          <span class="text-xs px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400 border border-indigo-500/40 ml-2">7-Layer Architecture</span>
+        </div>
+      </div>
+      <div class="flex items-center space-x-4">
+        <div class="text-xs bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-700">
+          <span class="text-gray-400">Currency:</span>
+          <span class="font-bold text-emerald-400">₹ INR (85.0/$)</span>
+        </div>
+        <div class="text-xs bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-700">
+          <span class="text-gray-400">Pipeline Stage:</span>
+          <span class="font-bold text-cyan-400">Normalization</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7 Layer Navigation Tabs -->
+    <nav class="border-t border-gray-800/80 bg-gray-950/80 px-4 overflow-x-auto">
+      <div class="max-w-7xl mx-auto flex space-x-6 text-sm py-2">
+        <a href="/layer1" class="nav-link pb-1 text-gray-400 hover:text-indigo-400 transition flex items-center space-x-1">
+          <span class="text-indigo-400 font-bold">1.</span> <span>Dashboard & Auth</span>
+        </a>
+        <a href="/layer2" class="nav-link pb-1 text-gray-400 hover:text-indigo-400 transition flex items-center space-x-1">
+          <span class="text-indigo-400 font-bold">2.</span> <span>Ingestion & FOCUS Data</span>
+        </a>
+        <a href="/layer3" class="nav-link active pb-1 text-white hover:text-indigo-400 transition flex items-center space-x-1">
+          <span class="text-indigo-400 font-bold">3.</span> <span>Normalizer</span>
+        </a>
+        <a href="/layer4" class="nav-link pb-1 text-gray-400 hover:text-indigo-400 transition flex items-center space-x-1">
+          <span class="text-indigo-400 font-bold">4.</span> <span>Detection & ML</span>
+        </a>
+        <a href="/layer5" class="nav-link pb-1 text-gray-400 hover:text-indigo-400 transition flex items-center space-x-1">
+          <span class="text-indigo-400 font-bold">5.</span> <span>Risk Classifier</span>
+        </a>
+        <a href="/layer6" class="nav-link pb-1 text-gray-400 hover:text-indigo-400 transition flex items-center space-x-1">
+          <span class="text-indigo-400 font-bold">6.</span> <span>Execution & Rollback</span>
+        </a>
+        <a href="/layer7" class="nav-link pb-1 text-gray-400 hover:text-indigo-400 transition flex items-center space-x-1">
+          <span class="text-indigo-400 font-bold">7.</span> <span>Audit & Persistence</span>
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-4 py-8 flex-1 w-full space-y-6">
+
+    <!-- Header Description Card -->
+    <div class="glass-card p-6 border-l-4 border-l-indigo-500">
+      <div class="text-xs font-bold text-indigo-400 tracking-wider uppercase mb-1">Layer 3 Specification</div>
+      <h1 class="text-2xl font-extrabold text-white">Canonical Universal Normalizer & Telemetry Enrichment</h1>
+      <p class="text-sm text-gray-400 mt-1">
+        Translates provider-specific JSON structures and FOCUS 1.0 schemas into CloudOptima's unified canonical representation.
+        Enriches records with hardware capacities (vCPUs, RAM), disk IOPS, network ingress/egress, and converts costs to Indian Rupees (₹).
+      </p>
+    </div>
+
+    <!-- Live Transformation Workbench -->
+    <div class="glass-card p-6">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+        <div>
+          <h2 class="text-lg font-bold text-white flex items-center space-x-2">
+            <span>🔄</span> <span>Interactive Transformation Workbench</span>
+          </h2>
+          <p class="text-xs text-gray-400 mt-0.5">
+            Select an ingested cloud resource to witness the live canonical normalization in real-time.
+          </p>
+        </div>
+        <div class="flex items-center space-x-3">
+          <label class="text-xs text-gray-400 font-semibold">Select Input Resource:</label>
+          <select id="resource-select" onchange="runNormalizationWorkbench()" class="text-xs bg-gray-800 border border-gray-700 rounded px-3 py-1.5 text-white">
+            <option value="i-0a8174fbcd738">AWS: i-0a8174fbcd738 (EC2 Batch Worker)</option>
+            <option value="vol-0941bc4e27f10">AWS: vol-0941bc4e27f10 (EBS Scratch Disk)</option>
+            <option value="vm-batch-indexer-stg">Azure: vm-batch-indexer-stg (Virtual Machine)</option>
+            <option value="disk-data-stage-backup">Azure: disk-data-stage-backup (Managed Disk)</option>
+            <option value="gcp-vm-dev-microservices">GCP: gcp-vm-dev-microservices (Compute Engine)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Before and After Side-by-Side Panels -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        <!-- Left: Raw Ingested Record -->
+        <div class="glass-card p-4 bg-gray-950 border border-gray-800">
+          <div class="flex justify-between items-center pb-2 mb-2 border-b border-gray-800">
+            <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">Before: Ingested Vendor / FOCUS JSON</span>
+            <span class="text-[10px] bg-gray-800 text-gray-300 px-2 py-0.5 rounded font-mono">Raw Payload</span>
+          </div>
+          <pre id="raw-json" class="text-xs font-mono text-gray-300 overflow-x-auto max-h-96 p-2 bg-gray-900/50 rounded"></pre>
+        </div>
+
+        <!-- Right: Canonical Normalized Object -->
+        <div class="glass-card p-4 bg-gray-950 border border-indigo-900/60">
+          <div class="flex justify-between items-center pb-2 mb-2 border-b border-gray-800">
+            <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider">After: CloudOptima Canonical Schema</span>
+            <span class="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded font-mono border border-indigo-500/40">Canonical Dataclass</span>
+          </div>
+          <pre id="norm-json" class="text-xs font-mono text-emerald-300 overflow-x-auto max-h-96 p-2 bg-gray-900/50 rounded"></pre>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Multi-Cloud Schema Mapping Dictionary -->
+    <div class="glass-card p-6">
+      <h2 class="text-lg font-bold text-white mb-2">Cross-Cloud Nomenclature Mapping Matrix</h2>
+      <p class="text-xs text-gray-400 mb-4">
+        How CloudOptima resolves vendor naming discrepancies so that detection rules and ML models remain 100% cloud-agnostic:
+      </p>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="bg-gray-950 text-gray-400 border-b border-gray-800">
+              <th class="p-3">Infrastructure Category</th>
+              <th class="p-3 text-amber-400">AWS Nomenclature</th>
+              <th class="p-3 text-cyan-400">Azure Nomenclature</th>
+              <th class="p-3 text-rose-400">GCP Nomenclature</th>
+              <th class="p-3 text-emerald-400 font-bold">CloudOptima Unified Schema</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-800 font-mono text-xs">
+            <tr>
+              <td class="p-3 font-semibold text-gray-200">Virtual Machines</td>
+              <td class="p-3 text-gray-300">EC2 Instance</td>
+              <td class="p-3 text-gray-300">Virtual Machine (VM)</td>
+              <td class="p-3 text-gray-300">Compute Engine</td>
+              <td class="p-3 font-bold text-cyan-400">compute_instance</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-semibold text-gray-200">Block Storage</td>
+              <td class="p-3 text-gray-300">EBS Volume</td>
+              <td class="p-3 text-gray-300">Managed Disk</td>
+              <td class="p-3 text-gray-300">Persistent Disk</td>
+              <td class="p-3 font-bold text-cyan-400">block_storage</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-semibold text-gray-200">Public IP Addresses</td>
+              <td class="p-3 text-gray-300">Elastic IP (EIP)</td>
+              <td class="p-3 text-gray-300">Public IP Address</td>
+              <td class="p-3 text-gray-300">External IP</td>
+              <td class="p-3 font-bold text-cyan-400">ip_address</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-semibold text-gray-200">Currency & Billing</td>
+              <td class="p-3 text-gray-300">Cost Explorer (USD)</td>
+              <td class="p-3 text-gray-300">Cost Management (USD)</td>
+              <td class="p-3 text-gray-300">Cloud Billing (USD)</td>
+              <td class="p-3 font-bold text-emerald-400">monthly_cost (₹ INR @ 85.0)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="border-t border-gray-800 py-4 text-center text-xs text-gray-500">
+    CloudOptima FinOps Governance Platform &bull; Layer 3: Canonical Universal Normalizer &bull; 1 USD = ₹85.0
+  </footer>
+
+  <script>
+    const sampleMappings = {
+      "i-0a8174fbcd738": {
+        raw: {
+          "Provider": "AWS",
+          "InstanceId": "i-0a8174fbcd738",
+          "InstanceType": "t3.xlarge",
+          "State": {"Name": "running"},
+          "Tags": [{"Key": "Environment", "Value": "dev"}, {"Key": "Team", "Value": "DataEng"}],
+          "CloudWatch": {"AverageCPU_7d": 3.4},
+          "CostExplorer": {"UnblendedCost": 248.00, "Currency": "USD"}
+        },
+        canonical: {
+          "resource_id": "i-0a8174fbcd738",
+          "provider": "aws",
+          "resource_type": "compute_instance",
+          "region": "ap-south-1",
+          "environment_tag": "dev",
+          "average_cpu": 3.4,
+          "monthly_cost_usd": 248.00,
+          "monthly_cost_inr": 21080.00,
+          "currency_symbol": "₹",
+          "extra_metadata": {
+            "vcpus": 4,
+            "memory_gb": 16.0,
+            "network_out_gb": 147.0,
+            "data_transfer_gb": 147.0
+          }
+        }
+      },
+      "vol-0941bc4e27f10": {
+        raw: {
+          "Provider": "AWS",
+          "VolumeId": "vol-0941bc4e27f10",
+          "Size": 500,
+          "State": "available",
+          "Attachments": [],
+          "Tags": [{"Key": "Environment", "Value": "dev"}],
+          "MonthlySpend": 50.00
+        },
+        canonical: {
+          "resource_id": "vol-0941bc4e27f10",
+          "provider": "aws",
+          "resource_type": "block_storage",
+          "region": "ap-south-1",
+          "environment_tag": "dev",
+          "average_cpu": 0.0,
+          "monthly_cost_usd": 50.00,
+          "monthly_cost_inr": 4250.00,
+          "currency_symbol": "₹",
+          "extra_metadata": {
+            "size_gb": 500,
+            "storage_used_gb": 45,
+            "storage_utilization_pct": 9.0,
+            "is_attached": false,
+            "iops": 0
+          }
+        }
+      },
+      "vm-batch-indexer-stg": {
+        raw: {
+          "Provider": "Azure",
+          "id": "/subscriptions/sub-1/resourceGroups/rg/providers/Microsoft.Compute/virtualMachines/vm-batch-indexer-stg",
+          "properties": {"hardwareProfile": {"vmSize": "Standard_D4s_v3"}},
+          "tags": {"Environment": "staging"},
+          "AzureMonitor": {"Percentage CPU": 7.2},
+          "Cost": 145.00
+        },
+        canonical: {
+          "resource_id": "vm-batch-indexer-stg",
+          "provider": "azure",
+          "resource_type": "compute_instance",
+          "region": "centralindia",
+          "environment_tag": "staging",
+          "average_cpu": 7.2,
+          "monthly_cost_usd": 145.00,
+          "monthly_cost_inr": 12325.00,
+          "currency_symbol": "₹",
+          "extra_metadata": {
+            "vcpus": 4,
+            "memory_gb": 16.0,
+            "network_out_gb": 112.0
+          }
+        }
+      },
+      "disk-data-stage-backup": {
+        raw: {
+          "Provider": "Azure",
+          "id": "disk-data-stage-backup",
+          "properties": {"diskSizeGB": 1024, "diskState": "Unattached"},
+          "Cost": 138.00
+        },
+        canonical: {
+          "resource_id": "disk-data-stage-backup",
+          "provider": "azure",
+          "resource_type": "block_storage",
+          "region": "centralindia",
+          "environment_tag": "staging",
+          "average_cpu": 0.0,
+          "monthly_cost_usd": 138.00,
+          "monthly_cost_inr": 11730.00,
+          "currency_symbol": "₹",
+          "extra_metadata": {
+            "size_gb": 1024,
+            "storage_used_gb": 420,
+            "is_attached": false,
+            "iops": 0
+          }
+        }
+      },
+      "gcp-vm-dev-microservices": {
+        raw: {
+          "Provider": "Google Cloud",
+          "name": "gcp-vm-dev-microservices",
+          "machineType": "e2-standard-2",
+          "labels": {"environment": "dev"},
+          "CloudMonitoring": {"cpu_utilization": 14.5},
+          "BilledCost": 98.00
+        },
+        canonical: {
+          "resource_id": "gcp-vm-dev-microservices",
+          "provider": "gcp",
+          "resource_type": "compute_instance",
+          "region": "asia-south1",
+          "environment_tag": "dev",
+          "average_cpu": 14.5,
+          "monthly_cost_usd": 98.00,
+          "monthly_cost_inr": 8330.00,
+          "currency_symbol": "₹",
+          "extra_metadata": {
+            "vcpus": 2,
+            "memory_gb": 8.0,
+            "network_out_gb": 89.0
+          }
+        }
+      }
+    };
+
+    function runNormalizationWorkbench() {
+      const selected = document.getElementById("resource-select").value;
+      const data = sampleMappings[selected];
+      if (data) {
+        document.getElementById("raw-json").textContent = JSON.stringify(data.raw, null, 2);
+        document.getElementById("norm-json").textContent = JSON.stringify(data.canonical, null, 2);
+      }
+    }
+
+    // Init
+    runNormalizationWorkbench();
+  </script>
+</body>
+</html>

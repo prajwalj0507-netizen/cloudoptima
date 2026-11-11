@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Layer 5: Multi-Factor Risk Classifier | CloudOptima</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background-color: #0B0F19; color: #E2E8F0; font-family: system-ui, -apple-system, sans-serif; }
+    .glass-card { background: rgba(17, 24, 39, 0.85); border: 1px solid #1F2937; border-radius: 12px; }
+    .nav-link.active { border-bottom: 2px solid #6366F1; color: #6366F1; font-weight: 700; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Top Global Header -->
+  <header class="border-b border-gray-800 bg-gray-900/90 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <span class="text-2xl">☁️</span>
+        <div>
+          <span class="font-bold text-lg text-white">CloudOptima</span>
+          <span class="text-xs px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400 border border-indigo-500/40 ml-2">7-Layer Architecture</span>
+        </div>
+      </div>
+      <div class="flex items-center space-x-4">
+        <div class="text-xs bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-700">
+          <span class="text-gray-400">Core Contribution:</span>
+          <span class="font-bold text-indigo-400">Multi-Factor Risk Model</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7 Layer Navigation Tabs -->
+    <nav class="border-t border-gray-800/80 bg-gray-950/80 px-4 overflow-x-auto">
+      <div class="max-w-7xl mx-auto flex space-x-6 text-sm py-2">
+        <a href="/layer1" class="nav-link pb-1 text-gray-400 hover:text-indigo-400 transition flex items-center space-x-1">
+          <span class="text-indigo-400 font-bold">1.</span> <span>Dashboard & Auth</span>
+        </a>
+        <a href="/layer2" class="nav-link pb-1 text-gray-400 hover:text-indigo-400 transition flex items-center space-x-1">
+          <span class="text-indigo-400 font-bold">2.</span> <span>Ingestion & FOCUS Data</span>
+        </a>
+        <a href="/layer3" class="nav-link pb-1 text-gray-400 hover:text-indigo-400 transition flex items-center space-x-1">
+          <span class="text-indigo-400 font-bold">3.</span> <span>Normalizer</span>
+        </a>
+        <a href="/layer4" class="nav-link pb-1 text-gray-400 hover:text-indigo-400 transition flex items-center space-x-1">
+          <span class="text-indigo-400 font-bold">4.</span> <span>Detection & ML</span>
+        </a>
+        <a href="/layer5" class="nav-link active pb-1 text-white hover:text-indigo-400 transition flex items-center space-x-1">
+          <span class="text-indigo-400 font-bold">5.</span> <span>Risk Classifier</span>
+        </a>
+        <a href="/layer6" class="nav-link pb-1 text-gray-400 hover:text-indigo-400 transition flex items-center space-x-1">
+          <span class="text-indigo-400 font-bold">6.</span> <span>Execution & Rollback</span>
+        </a>
+        <a href="/layer7" class="nav-link pb-1 text-gray-400 hover:text-indigo-400 transition flex items-center space-x-1">
+          <span class="text-indigo-400 font-bold">7.</span> <span>Audit & Persistence</span>
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-4 py-8 flex-1 w-full space-y-6">
+
+    <!-- Header Description Card -->
+    <div class="glass-card p-6 border-l-4 border-l-rose-500">
+      <div class="text-xs font-bold text-rose-400 tracking-wider uppercase mb-1">Layer 5 Specification (Core Contribution)</div>
+      <h1 class="text-2xl font-extrabold text-white">Multi-Factor Risk Classifier & Governance Routing</h1>
+      <p class="text-sm text-gray-400 mt-1">
+        Solves the <em>Blind Automation Dilemma</em> by quantifying operational blast radius into a bounded 0–100 score.
+        Separates safe zero-touch auto-remediations from high-risk mutations that mandate human approval.
+      </p>
+    </div>
+
+    <!-- The 4-Factor Objective Formula Box -->
+    <div class="glass-card p-6 bg-gradient-to-r from-gray-900 to-indigo-950/40 border border-indigo-900/50">
+      <div class="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-2">Mathematical Formulation</div>
+      <div class="text-xl font-mono font-extrabold text-white">
+        Risk Score = min(100, Score_Env + Score_Topology + Score_Action + Score_Confidence)
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 pt-4 border-t border-gray-800 text-xs">
+        <div>
+          <span class="font-bold text-cyan-400">1. Environment (40% Wt)</span>
+          <p class="text-gray-400 mt-0.5">Prod (+45) &bull; Staging (+20) &bull; Dev (+5) &bull; Untagged (+25)</p>
+        </div>
+        <div>
+          <span class="font-bold text-cyan-400">2. Topology (30% Wt)</span>
+          <p class="text-gray-400 mt-0.5">Behind ALB (+35) &bull; Disk Mounts (+25) &bull; Standalone (0)</p>
+        </div>
+        <div>
+          <span class="font-bold text-cyan-400">3. Action (20% Wt)</span>
+          <p class="text-gray-400 mt-0.5">Delete (+20) &bull; Stop (+15) &bull; Release IP (+5)</p>
+        </div>
+        <div>
+          <span class="font-bold text-cyan-400">4. Confidence (10% Wt)</span>
+          <p class="text-gray-400 mt-0.5">Boundary CPU (+10) &bull; Definitive 0-IOPS (-5)</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive Risk Scoring Laboratory -->
+    <div class="glass-card p-6">
+      <h2 class="text-lg font-bold text-white mb-1">Interactive Risk Scoring Laboratory</h2>
+      <p class="text-xs text-gray-400 mb-6">
+        Adjust the environmental variables and topology toggles below to observe how the Risk Classifier computes the score and routes the action:
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+        
+        <!-- Controls Column 1 & 2 -->
+        <div class="md:col-span-2 space-y-4">
+          
+          <!-- Environment Selector -->
+          <div>
+            <label class="block text-xs font-bold text-gray-300 mb-1">1. Workload Environment Tag:</label>
+            <div class="grid grid-cols-3 gap-2">
+              <button onclick="setEnv('production', 45)" id="btn-env-prod" class="text-xs py-2 px-3 rounded bg-indigo-600 text-white font-semibold transition">Production (+45)</button>
+              <button onclick="setEnv('staging', 20)" id="btn-env-stg" class="text-xs py-2 px-3 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 transition">Staging (+20)</button>
+              <button onclick="setEnv('dev', 5)" id="btn-env-dev" class="text-xs py-2 px-3 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 transition">Dev / Sandbox (+5)</button>
+            </div>
+          </div>
+
+          <!-- Topology Toggles -->
+          <div>
+            <label class="block text-xs font-bold text-gray-300 mb-1">2. Topology & Blast Radius:</label>
+            <div class="flex flex-wrap gap-4 text-xs">
+              <label class="flex items-center space-x-2 cursor-pointer">
+                <input type="checkbox" id="chk-alb" onchange="calcRisk()" class="rounded bg-gray-800 border-gray-700 text-indigo-600">
+                <span>Behind Load Balancer (+35 pts)</span>
+              </label>
+              <label class="flex items-center space-x-2 cursor-pointer">
+                <input type="checkbox" id="chk-mount" onchange="calcRisk()" class="rounded bg-gray-800 border-gray-700 text-indigo-600">
+                <span>Active Disk / Volume Mounts (+25 pts)</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Remediation Action Type -->
+          <div>
+            <label class="block text-xs font-bold text-gray-300 mb-1">3. Proposed Remediation Action:</label>
+            <select id="action-select" onchange="calcRisk()" class="text-xs bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white w-full">
+              <option value="20">delete_volume (Destructive Storage Removal - +20 pts)</option>
+              <option value="15" selected>stop_instance (Reversible Compute Instance Stop - +15 pts)</option>
+              <option value="5">release_ip (Unassociated IP Release - +5 pts)</option>
+              <option value="5">schedule_stop (Automate Off-Hours Schedule - +5 pts)</option>
+            </select>
+          </div>
+
+          <!-- Confidence Adjustment -->
+          <div>
+            <label class="block text-xs font-bold text-gray-300 mb-1">4. Metric Boundary & Confidence:</label>
+            <label class="flex items-center space-x-2 text-xs cursor-pointer">
+              <input type="checkbox" id="chk-boundary" onchange="calcRisk()" class="rounded bg-gray-800 border-gray-700 text-indigo-600">
+              <span>Boundary Metric (e.g. CPU near 9.5% threshold) / ML Anomaly (+10 pts)</span>
+            </label>
+          </div>
+
+        </div>
+
+        <!-- Gauge / Output Column -->
+        <div class="glass-card p-6 bg-gray-950 border border-gray-800 flex flex-col items-center justify-center text-center">
+          <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Computed Risk Score</span>
+          <div class="text-5xl font-extrabold text-white mt-2 font-mono" id="score-display">60.0</div>
+          
+          <div class="mt-4 w-full">
+            <div class="h-3 w-full bg-gray-800 rounded-full overflow-hidden">
+              <div id="risk-bar" class="h-full bg-amber-500 transition-all duration-300" style="width: 60%;"></div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-gray-800 w-full">
+            <span class="text-xs text-gray-500">Governance Decision:</span>
+            <div id="routing-badge" class="mt-1 px-3 py-1 rounded text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/40">
+              HUMAN APPROVAL QUEUE
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Live Evaluated Findings Table -->
+    <div class="glass-card p-6">
+      <h2 class="text-lg font-bold text-white mb-1">Live Fleet Findings & Risk Evaluation Matrix</h2>
+      <p class="text-xs text-gray-400 mb-4">
+        All active waste items scored by the Risk Classifier across AWS, Azure, and GCP:
+      </p>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="bg-gray-950 text-gray-400 border-b border-gray-800">
+              <th class="p-3">Resource ID</th>
+              <th class="p-3">Environment</th>
+              <th class="p-3">Waste Category</th>
+              <th class="p-3">Action</th>
+              <th class="p-3">Monthly Savings (₹)</th>
+              <th class="p-3">Risk Score</th>
+              <th class="p-3">Level</th>
+              <th class="p-3">Routing Queue</th>
+            </tr>
+          </thead>
+          <tbody id="findings-tbody" class="divide-y divide-gray-800 font-mono text-xs">
+            <!-- Dynamic rows inserted here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="border-t border-gray-800 py-4 text-center text-xs text-gray-500">
+    CloudOptima FinOps Governance Platform &bull; Layer 5: Multi-Factor Risk Classifier &bull; 1 USD = ₹85.0
+  </footer>
+
+  <script>
+    let envScore = 45;
+
+    function setEnv(env, score) {
+      envScore = score;
+      document.getElementById("btn-env-prod").className = env === 'production' ? "text-xs py-2 px-3 rounded bg-indigo-600 text-white font-semibold transition" : "text-xs py-2 px-3 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 transition";
+      document.getElementById("btn-env-stg").className = env === 'staging' ? "text-xs py-2 px-3 rounded bg-indigo-600 text-white font-semibold transition" : "text-xs py-2 px-3 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 transition";
+      document.getElementById("btn-env-dev").className = env === 'dev' ? "text-xs py-2 px-3 rounded bg-indigo-600 text-white font-semibold transition" : "text-xs py-2 px-3 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 transition";
+      calcRisk();
+    }
+
+    function calcRisk() {
+      let score = envScore;
+      if (document.getElementById("chk-alb").checked) score += 35;
+      if (document.getElementById("chk-mount").checked) score += 25;
+      score += parseInt(document.getElementById("action-select").value);
+      if (document.getElementById("chk-boundary").checked) score += 10;
+
+      score = Math.min(100, score);
+      document.getElementById("score-display").textContent = score.toFixed(1);
+      document.getElementById("risk-bar").style.width = score + "%";
+
+      const bar = document.getElementById("risk-bar");
+      const badge = document.getElementById("routing-badge");
+
+      if (score < 35) {
+        bar.className = "h-full bg-emerald-500 transition-all duration-300";
+        badge.className = "mt-1 px-3 py-1 rounded text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40";
+        badge.textContent = "AUTO-REMEDIATE QUEUE (Zero-Touch)";
+      } else if (score < 70) {
+        bar.className = "h-full bg-amber-500 transition-all duration-300";
+        badge.className = "mt-1 px-3 py-1 rounded text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/40";
+        badge.textContent = "HUMAN APPROVAL QUEUE (Medium Risk)";
+      } else {
+        bar.className = "h-full bg-rose-500 transition-all duration-300";
+        badge.className = "mt-1 px-3 py-1 rounded text-xs font-bold bg-rose-500/20 text-rose-400 border border-rose-500/40";
+        badge.textContent = "CRITICAL GOVERNANCE QUEUE (Snapshot Enforced)";
+      }
+    }
+
+    async function loadFindings() {
+      try {
+        const res = await fetch("/api/findings");
+        const findings = await res.json();
+        const tbody = document.getElementById("findings-tbody");
+        tbody.innerHTML = "";
+
+        findings.forEach(f => {
+          const tr = document.createElement("tr");
+          tr.className = "hover:bg-gray-800/40 transition";
+          
+          let levelBadge = `<span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">LOW</span>`;
+          let routeBadge = `<span class="text-emerald-400">Auto-Remediate</span>`;
+
+          if (f.risk_level === "MEDIUM") {
+            levelBadge = `<span class="px-2 py-0.5 rounded text-[10px] bg-amber-500/20 text-amber-400 border border-amber-500/30">MEDIUM</span>`;
+            routeBadge = `<span class="text-amber-400">Approval Queue</span>`;
+          } else if (f.risk_level === "HIGH" || f.risk_level === "CRITICAL") {
+            levelBadge = `<span class="px-2 py-0.5 rounded text-[10px] bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold">HIGH</span>`;
+            routeBadge = `<span class="text-rose-400 font-bold">Critical Governance</span>`;
+          }
+
+          const inrSavings = (f.estimated_monthly_saving * 85).toLocaleString('en-IN', {minimumFractionDigits: 2});
+
+          tr.innerHTML = `
+            <td class="p-3 text-cyan-400 font-bold">${f.resource_id}</td>
+            <td class="p-3 text-gray-300">${f.provider.toUpperCase()}</td>
+            <td class="p-3 text-gray-300">${f.category}</td>
+            <td class="p-3 text-gray-400">${f.recommended_action}</td>
+            <td class="p-3 text-emerald-400 font-semibold">₹${inrSavings}</td>
+            <td class="p-3 text-white font-bold">${f.risk_score.toFixed(1)}</td>
+            <td class="p-3">${levelBadge}</td>
+            <td class="p-3">${routeBadge}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (e) {
+        console.error("Error loading findings", e);
+      }
+    }
+
+    // Init
+    calcRisk();
+    loadFindings();
+  </script>
+</body>
+</html>

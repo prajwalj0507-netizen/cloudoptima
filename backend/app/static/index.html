@@ -1,0 +1,2738 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CloudOptima - Multi-Cloud Waste Detection & Risk Governance</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50: '#eef2ff', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca' },
+            aws: { DEFAULT: '#FF9900', light: '#FEF3C7', dark: '#B45309' },
+            azure: { DEFAULT: '#0078D4', light: '#E0F2FE', dark: '#0369A1' },
+            gcp: { DEFAULT: '#10B981', light: '#DCFCE7', dark: '#047857' },
+            darkbg: '#0B0F19',
+            cardbg: '#111827',
+            cardborder: '#1F2937'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background-color: #0B0F19; color: #F3F4F6; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    .glass-card { background: rgba(17, 24, 39, 0.88); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .tab-active { border-bottom: 2px solid #6366F1; color: #818CF8; font-weight: 700; }
+    /* Separate Provider Card Styles */
+    .provider-card-aws { border-color: rgba(245, 158, 11, 0.45); background: linear-gradient(135deg, rgba(17,24,39,0.95), rgba(245,158,11,0.08)); }
+    .provider-card-azure { border-color: rgba(2, 132, 199, 0.45); background: linear-gradient(135deg, rgba(17,24,39,0.95), rgba(2,132,199,0.08)); }
+    .provider-card-gcp { border-color: rgba(16, 185, 129, 0.45); background: linear-gradient(135deg, rgba(17,24,39,0.95), rgba(16,185,129,0.08)); }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- ========================================================================= -->
+  <!-- 1. LOGIN SCREEN (Visible when unauthenticated) -->
+  <!-- ========================================================================= -->
+  <div id="login-view" class="fixed inset-0 z-50 flex items-center justify-center px-4 overflow-y-auto bg-cover bg-center bg-no-repeat relative" style="background-image: linear-gradient(135deg, rgba(11, 15, 25, 0.78), rgba(5, 10, 24, 0.88)), url('/static/img/login_bg_merged.jpg');">
+    <div class="glass-card max-w-md w-full rounded-3xl p-8 border border-cyan-500/30 shadow-2xl relative overflow-hidden my-8" style="background: rgba(11, 17, 33, 0.88); backdrop-filter: blur(20px); box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.85), 0 0 35px rgba(6, 182, 212, 0.15);">
+      <!-- Glow effect -->
+      <div class="absolute -top-24 -left-24 w-48 h-48 bg-indigo-500/25 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-24 -right-24 w-48 h-48 bg-cyan-500/25 rounded-full blur-3xl pointer-events-none"></div>
+
+      <!-- Header & Branding -->
+      <div class="text-center mb-6 relative">
+        <div class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/25 text-[11px] font-mono mb-3">
+          <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
+          <span>Enterprise Multi-Cloud Infrastructure</span>
+        </div>
+        <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-tr from-indigo-600 via-cyan-500 to-teal-400 flex items-center justify-center shadow-lg shadow-indigo-500/30 mb-3">
+          <i data-lucide="cloud-lightning" class="text-white w-8 h-8"></i>
+        </div>
+        <h2 class="text-2xl font-extrabold text-white">CloudOptima</h2>
+        <p class="text-xs text-gray-300 mt-1">Multi-Cloud Waste Detection & Risk Governance</p>
+      </div>
+
+      <!-- Role Selector Tabs -->
+      <div class="flex rounded-xl bg-gray-900 p-1 mb-5 border border-gray-800 text-xs font-semibold">
+        <button type="button" onclick="selectLoginRole('admin')" id="role-tab-admin" class="flex-1 py-2 rounded-lg bg-indigo-600 text-white transition flex items-center justify-center space-x-1.5 shadow">
+          <i data-lucide="shield" class="w-3.5 h-3.5"></i>
+          <span>Admin Portal</span>
+        </button>
+        <button type="button" onclick="selectLoginRole('approver')" id="role-tab-approver" class="flex-1 py-2 rounded-lg text-gray-400 hover:text-gray-200 transition flex items-center justify-center space-x-1.5">
+          <i data-lucide="user-check" class="w-3.5 h-3.5"></i>
+          <span>Approver Portal</span>
+        </button>
+      </div>
+
+      <!-- Login Form -->
+      <form onsubmit="handleManualLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1">Username</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
+              <i data-lucide="user" class="w-4 h-4"></i>
+            </span>
+            <input type="text" id="login-username" value="admin" required class="w-full bg-gray-900 border border-gray-800 rounded-xl pl-9 pr-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-indigo-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1">Password</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
+              <i data-lucide="lock" class="w-4 h-4"></i>
+            </span>
+            <input type="password" id="login-password" value="admin123" required class="w-full bg-gray-900 border border-gray-800 rounded-xl pl-9 pr-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-indigo-500">
+          </div>
+        </div>
+
+        <div id="login-error-msg" class="text-xs text-rose-400 hidden text-center"></div>
+
+        <button type="submit" id="btn-login-submit" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-bold hover:from-indigo-500 hover:to-purple-500 transition shadow-lg shadow-indigo-600/30 flex items-center justify-center space-x-1.5">
+          <span>Sign In to CloudOptima</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
+      </form>
+
+      <!-- Instant 1-Click Role Login for Evaluation -->
+      <div class="mt-6 pt-5 border-t border-gray-800/80 space-y-2">
+        <p class="text-[11px] text-gray-400 text-center font-medium">Instant Role Access (1-Click for Evaluation):</p>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <button type="button" onclick="quickLogin('admin', 'admin123')" class="p-2.5 rounded-xl bg-indigo-950/60 hover:bg-indigo-900/60 text-indigo-300 border border-indigo-800/40 font-medium transition text-left flex items-center space-x-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-indigo-400"></span>
+            <div>
+              <div class="font-bold">Cloud Operations Admin</div>
+              <div class="text-[10px] text-gray-400">Full Fleet Control</div>
+            </div>
+          </button>
+          <button type="button" onclick="quickLogin('approver', 'approver123')" class="p-2.5 rounded-xl bg-amber-950/60 hover:bg-amber-900/60 text-amber-300 border border-amber-800/40 font-medium transition text-left flex items-center space-x-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+            <div>
+              <div class="font-bold">Governance Approver</div>
+              <div class="text-[10px] text-gray-400">Risk Approval Queue</div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 2. DASHBOARD VIEW (Visible when authenticated) -->
+  <!-- ========================================================================= -->
+  <div id="dashboard-view" class="hidden flex-1 flex flex-col">
+
+    <!-- Top Navigation Header -->
+    <header class="glass-card sticky top-0 z-40 px-6 py-3.5 border-b border-gray-800 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-400 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+          <i data-lucide="cloud-lightning" class="text-white w-6 h-6"></i>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-200 to-indigo-300">CloudOptima</span>
+            <span id="header-role-badge" class="text-xs px-2.5 py-0.5 rounded-full font-semibold">Role</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">INR (₹)</span>
+          </div>
+          <p class="text-xs text-gray-400">Multi-Cloud Waste Detection & Risk-Governed Governance</p>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center space-x-3">
+        <button onclick="syncFleetData()" id="btn-sync" class="admin-only px-3.5 py-1.5 text-xs font-medium rounded-lg bg-indigo-600/20 text-indigo-300 hover:bg-indigo-600/30 border border-indigo-500/30 flex items-center space-x-1.5 transition">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+          <span>Sync Enterprise Fleet</span>
+        </button>
+
+        <button onclick="triggerScanAll()" id="btn-scan" class="admin-only px-3.5 py-1.5 text-xs font-medium rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-500 hover:to-purple-500 shadow-md shadow-indigo-500/25 flex items-center space-x-1.5 transition">
+          <i data-lucide="scan" class="w-3.5 h-3.5"></i>
+          <span>Run Fleet Scan</span>
+        </button>
+
+        <button onclick="openClearModal()" id="btn-clear-menu" class="admin-only px-3.5 py-1.5 text-xs font-medium rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center space-x-1.5 transition">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+          <span>Clear / Reset</span>
+        </button>
+
+        <div class="h-6 w-px bg-gray-800"></div>
+
+        <!-- User Profile & Sign Out -->
+        <div class="flex items-center space-x-3 pl-2">
+          <div class="text-right text-xs">
+            <div id="user-display-name" class="font-medium text-gray-200">Admin User</div>
+            <div id="user-display-role" class="text-indigo-400 font-semibold uppercase text-[10px]">ADMIN</div>
+          </div>
+          <button onclick="handleLogout()" title="Sign Out" class="p-2 rounded-lg bg-gray-800 hover:bg-rose-950/60 text-gray-400 hover:text-rose-300 border border-gray-700 transition">
+            <i data-lucide="log-out" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-6 py-6 space-y-6">
+
+      <!-- Role-based Welcome Banner -->
+      <div id="role-welcome-banner" class="p-4 rounded-2xl border text-xs flex items-center justify-between">
+        <div class="flex items-center space-x-2.5">
+          <i id="role-banner-icon" data-lucide="info" class="w-5 h-5"></i>
+          <div>
+            <span id="role-banner-title" class="font-bold text-sm block">Welcome</span>
+            <span id="role-banner-desc" class="text-gray-300">Overview of system state</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Bar (Dedicated Web Pages Inside Dashboard) -->
+      <div class="border-b border-gray-800 flex space-x-6 text-xs font-medium overflow-x-auto pb-1">
+        <button onclick="switchTab('analytics')" id="tab-btn-analytics" class="admin-tab tab-btn py-3 tab-active flex items-center space-x-1.5 whitespace-nowrap">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          <span>Overview & Accounts</span>
+        </button>
+        <button onclick="switchTab('focus')" id="tab-btn-focus" class="tab-btn py-3 text-gray-400 hover:text-gray-200 flex items-center space-x-1.5 whitespace-nowrap">
+          <i data-lucide="database" class="w-4 h-4 text-indigo-400"></i>
+          <span class="text-indigo-400 font-semibold">FOCUS Ingestion</span>
+        </button>
+        <button onclick="switchTab('resources')" id="tab-btn-resources" class="tab-btn py-3 text-gray-400 hover:text-gray-200 flex items-center space-x-1.5 whitespace-nowrap">
+          <i data-lucide="server" class="w-4 h-4 text-emerald-400"></i>
+          <span class="text-emerald-400 font-semibold">Resource Telemetry</span>
+        </button>
+        <button onclick="switchTab('traces')" id="tab-btn-traces" class="tab-btn py-3 text-gray-400 hover:text-gray-200 flex items-center space-x-1.5 whitespace-nowrap">
+          <i data-lucide="activity" class="w-4 h-4 text-cyan-400"></i>
+          <span class="text-cyan-400 font-semibold">5-Min CPU Traces</span>
+        </button>
+        <button onclick="switchTab('findings')" id="tab-btn-findings" class="tab-btn py-3 text-gray-400 hover:text-gray-200 flex items-center space-x-1.5 whitespace-nowrap">
+          <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-400"></i>
+          <span class="text-amber-400 font-semibold">Waste Findings & ML</span>
+        </button>
+        <button onclick="switchTab('simulator')" id="tab-btn-simulator" class="tab-btn py-3 text-gray-400 hover:text-gray-200 flex items-center space-x-1.5 whitespace-nowrap">
+          <i data-lucide="sliders" class="w-4 h-4 text-rose-400"></i>
+          <span class="text-rose-400 font-semibold">Risk Classifier Sandbox</span>
+        </button>
+        <button onclick="switchTab('approvals')" id="tab-btn-approvals" class="tab-btn py-3 text-gray-400 hover:text-gray-200 flex items-center space-x-1.5 whitespace-nowrap">
+          <i data-lucide="shield-check" class="w-4 h-4"></i>
+          <span>Approvals & Rollback</span>
+          <span id="badge-approval-count" class="ml-1 px-1.5 py-0.2 rounded-full bg-indigo-600 text-white text-[10px]">0</span>
+        </button>
+        <button onclick="switchTab('audit')" id="tab-btn-audit" class="admin-tab tab-btn py-3 text-gray-400 hover:text-gray-200 flex items-center space-x-1.5 whitespace-nowrap">
+          <i data-lucide="file-text" class="w-4 h-4"></i>
+          <span>Audit Trail</span>
+        </button>
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- PAGE 1: OVERVIEW & ACCOUNTS (TAB: analytics) -->
+      <!-- ===================================================================== -->
+      <div id="tab-content-analytics" class="tab-pane space-y-6">
+        <!-- 4 Top KPI Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="glass-card rounded-2xl p-5 relative overflow-hidden group">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Potential Monthly Waste</p>
+                <h3 id="stat-potential-savings" class="text-3xl font-extrabold text-white mt-1 cursor-pointer hover:text-amber-400 transition" onclick="switchTab('findings')" title="Click to view all waste findings">₹0.00</h3>
+              </div>
+              <div class="flex items-center space-x-1.5">
+                <button onclick="reopenAllWaste()" title="Reset / Clear Waste (Reopen all findings)" class="px-2 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 transition text-[11px] font-semibold flex items-center space-x-1">
+                  <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                  <span>Clear</span>
+                </button>
+                <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold text-lg">₹</div>
+              </div>
+            </div>
+            <div class="mt-4 flex items-center justify-between text-xs text-gray-400">
+              <span class="text-amber-400 flex items-center"><i data-lucide="alert-triangle" class="w-3.5 h-3.5 mr-1"></i> Recoverable Fleet Waste</span>
+              <button onclick="reopenAllWaste()" class="text-[11px] text-amber-400/90 hover:text-amber-300 underline font-medium">Reset Waste</button>
+            </div>
+            <div class="mt-3 pt-2.5 border-t border-gray-800/80 flex items-center justify-between text-xs">
+              <button onclick="switchTab('findings')" class="text-xs text-amber-400 hover:text-amber-300 font-bold flex items-center space-x-1 transition group-hover:underline">
+                <span>View Detected Waste Items</span>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="glass-card rounded-2xl p-5 relative overflow-hidden group">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Confirmed Realized Savings</p>
+                <h3 id="stat-realized-savings" class="text-3xl font-extrabold text-emerald-400 mt-1">₹0.00</h3>
+              </div>
+              <div class="flex items-center space-x-1.5">
+                <button onclick="clearRealizedSavings()" title="Clear Realized Savings Ledger to ₹0.00" class="px-2 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition text-[11px] font-semibold flex items-center space-x-1">
+                  <i data-lucide="eraser" class="w-3 h-3"></i>
+                  <span>Clear</span>
+                </button>
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold text-lg">₹</div>
+              </div>
+            </div>
+            <div class="mt-4 flex items-center justify-between text-xs text-gray-400">
+              <span class="text-emerald-400 flex items-center"><i data-lucide="check-circle" class="w-3.5 h-3.5 mr-1"></i> Verified & Committed</span>
+              <button onclick="clearRealizedSavings()" class="text-[11px] text-emerald-400/90 hover:text-emerald-300 underline font-medium">Clear to ₹0</button>
+            </div>
+            <div class="mt-3 pt-2.5 border-t border-gray-800/80 flex items-center justify-between text-xs">
+              <button onclick="switchTab('approvals')" class="text-xs text-emerald-400 hover:text-emerald-300 font-bold flex items-center space-x-1 transition group-hover:underline">
+                <span>View Execution History</span>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="glass-card rounded-2xl p-5 relative overflow-hidden group">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Active Waste Findings</p>
+                <h3 id="stat-open-findings" class="text-3xl font-extrabold text-white mt-1 cursor-pointer hover:text-blue-400 transition" onclick="switchTab('findings')" title="Click to go directly to Waste Findings">0</h3>
+              </div>
+              <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center">
+                <i data-lucide="search" class="w-5 h-5"></i>
+              </div>
+            </div>
+            <div class="mt-4 flex items-center space-x-2 text-xs" id="risk-distribution-pills">
+              <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">0 Low</span>
+              <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300">0 Med</span>
+              <span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300">0 High</span>
+            </div>
+            <div class="mt-3 pt-2.5 border-t border-gray-800/80 flex items-center justify-between text-xs">
+              <button onclick="switchTab('findings')" class="text-xs text-blue-400 hover:text-blue-300 font-bold flex items-center space-x-1 transition group-hover:underline">
+                <span>Go to Waste Findings</span>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="glass-card rounded-2xl p-5 relative overflow-hidden group">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Pending Approvals</p>
+                <h3 id="stat-pending-approvals" class="text-3xl font-extrabold text-indigo-400 mt-1 cursor-pointer hover:text-indigo-300 transition" onclick="switchTab('approvals')" title="Click to go directly to Approvals Queue">0</h3>
+              </div>
+              <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
+                <i data-lucide="user-check" class="w-5 h-5"></i>
+              </div>
+            </div>
+            <div class="mt-4 flex items-center space-x-2 text-xs text-gray-400">
+              <span class="text-indigo-400 font-medium">Human Governance</span>
+              <span>approval active</span>
+            </div>
+            <div class="mt-3 pt-2.5 border-t border-gray-800/80 flex items-center justify-between text-xs">
+              <button onclick="switchTab('approvals')" class="text-xs text-indigo-400 hover:text-indigo-300 font-bold flex items-center space-x-1 transition group-hover:underline">
+                <span>Review Approvals Queue</span>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3 Distinct Cloud Account Cards (AWS Orange, Azure Blue, GCP Green) -->
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="font-bold text-gray-200 text-sm flex items-center">
+              <i data-lucide="cloud" class="w-4 h-4 mr-2 text-indigo-400"></i>
+              Active Multi-Cloud Enterprise Accounts
+            </h4>
+            <span class="text-[11px] text-gray-400">3 Cloud Accounts Integrated &bull; Click Detected Waste to filter</span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Account 1: AWS (Amber / Orange) -->
+            <div class="provider-card-aws rounded-2xl p-5 border relative overflow-hidden shadow-lg">
+              <div class="flex justify-between items-start mb-3">
+                <div class="flex items-center space-x-2.5">
+                  <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-black text-sm border border-amber-500/40">
+                    AWS
+                  </div>
+                  <div>
+                    <h5 class="font-bold text-white text-sm">Amazon Web Services</h5>
+                    <p class="text-[11px] text-amber-300/80 font-mono">Account ID: 123456789012</p>
+                  </div>
+                </div>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 uppercase">us-east-1</span>
+              </div>
+              <div class="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-amber-500/20">
+                <div>
+                  <span class="text-gray-400 block text-[10px] uppercase">Monthly Spend</span>
+                  <span class="font-bold text-white text-sm">₹2,84,750</span>
+                </div>
+                <div onclick="goToProviderWaste('aws')" class="cursor-pointer group/w hover:bg-amber-500/10 p-1 rounded-lg transition border border-transparent hover:border-amber-500/30" title="Click to view AWS Waste Findings">
+                  <span class="text-gray-400 block text-[10px] uppercase flex items-center justify-between">
+                    <span>Detected Waste</span>
+                    <i data-lucide="arrow-right" class="w-3 h-3 text-amber-400 opacity-60 group-hover/w:opacity-100 transition"></i>
+                  </span>
+                  <span class="font-bold text-amber-400 text-sm group-hover/w:underline">₹76,500 &rarr;</span>
+                </div>
+              </div>
+              <div class="mt-3 flex items-center justify-between text-[11px] text-gray-400 pt-2 border-t border-amber-500/10">
+                <span class="text-emerald-400 flex items-center"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5"></span>Connected (boto3)</span>
+                <button onclick="goToProviderWaste('aws')" class="text-[11px] text-amber-400 hover:text-amber-300 font-semibold underline">12 Waste Assets &rarr;</button>
+              </div>
+            </div>
+
+            <!-- Account 2: Azure (Sky Blue) -->
+            <div class="provider-card-azure rounded-2xl p-5 border relative overflow-hidden shadow-lg">
+              <div class="flex justify-between items-start mb-3">
+                <div class="flex items-center space-x-2.5">
+                  <div class="w-9 h-9 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center font-black text-sm border border-sky-500/40">
+                    AZ
+                  </div>
+                  <div>
+                    <h5 class="font-bold text-white text-sm">Microsoft Azure</h5>
+                    <p class="text-[11px] text-sky-300/80 font-mono">Subscription: sub-prod-azure-01</p>
+                  </div>
+                </div>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 uppercase">eastus</span>
+              </div>
+              <div class="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-sky-500/20">
+                <div>
+                  <span class="text-gray-400 block text-[10px] uppercase">Monthly Spend</span>
+                  <span class="font-bold text-white text-sm">₹1,78,500</span>
+                </div>
+                <div onclick="goToProviderWaste('azure')" class="cursor-pointer group/w hover:bg-sky-500/10 p-1 rounded-lg transition border border-transparent hover:border-sky-500/30" title="Click to view Azure Waste Findings">
+                  <span class="text-gray-400 block text-[10px] uppercase flex items-center justify-between">
+                    <span>Detected Waste</span>
+                    <i data-lucide="arrow-right" class="w-3 h-3 text-sky-400 opacity-60 group-hover/w:opacity-100 transition"></i>
+                  </span>
+                  <span class="font-bold text-sky-400 text-sm group-hover/w:underline">₹46,750 &rarr;</span>
+                </div>
+              </div>
+              <div class="mt-3 flex items-center justify-between text-[11px] text-gray-400 pt-2 border-t border-sky-500/10">
+                <span class="text-emerald-400 flex items-center"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5"></span>Connected (azure-mgmt)</span>
+                <button onclick="goToProviderWaste('azure')" class="text-[11px] text-sky-400 hover:text-sky-300 font-semibold underline">9 Waste Assets &rarr;</button>
+              </div>
+            </div>
+
+            <!-- Account 3: GCP (Emerald Green) -->
+            <div class="provider-card-gcp rounded-2xl p-5 border relative overflow-hidden shadow-lg">
+              <div class="flex justify-between items-start mb-3">
+                <div class="flex items-center space-x-2.5">
+                  <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-black text-sm border border-emerald-500/40">
+                    GCP
+                  </div>
+                  <div>
+                    <h5 class="font-bold text-white text-sm">Google Cloud Platform</h5>
+                    <p class="text-[11px] text-emerald-300/80 font-mono">Project: gcp-prod-infra-987</p>
+                  </div>
+                </div>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 uppercase">us-central1</span>
+              </div>
+              <div class="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-emerald-500/20">
+                <div>
+                  <span class="text-gray-400 block text-[10px] uppercase">Monthly Spend</span>
+                  <span class="font-bold text-white text-sm">₹1,09,650</span>
+                </div>
+                <div onclick="goToProviderWaste('gcp')" class="cursor-pointer group/w hover:bg-emerald-500/10 p-1 rounded-lg transition border border-transparent hover:border-emerald-500/30" title="Click to view GCP Waste Findings">
+                  <span class="text-gray-400 block text-[10px] uppercase flex items-center justify-between">
+                    <span>Detected Waste</span>
+                    <i data-lucide="arrow-right" class="w-3 h-3 text-emerald-400 opacity-60 group-hover/w:opacity-100 transition"></i>
+                  </span>
+                  <span class="font-bold text-emerald-400 text-sm group-hover/w:underline">₹32,725 &rarr;</span>
+                </div>
+              </div>
+              <div class="mt-3 flex items-center justify-between text-[11px] text-gray-400 pt-2 border-t border-emerald-500/10">
+                <span class="text-emerald-400 flex items-center"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5"></span>Connected (google-cloud)</span>
+                <button onclick="goToProviderWaste('gcp')" class="text-[11px] text-emerald-400 hover:text-emerald-300 font-semibold underline">6 Waste Assets &rarr;</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="glass-card rounded-2xl p-6 lg:col-span-2">
+            <div class="flex justify-between items-center mb-4">
+              <div>
+                <h4 class="font-semibold text-gray-200">Cumulative Savings Growth (14 Days)</h4>
+                <p class="text-xs text-gray-400">Realized savings achieved post-verification</p>
+              </div>
+              <span class="text-xs px-2.5 py-1 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-medium">INR (₹)</span>
+            </div>
+            <div class="h-64">
+              <canvas id="chart-savings-trend"></canvas>
+            </div>
+          </div>
+
+          <div class="glass-card rounded-2xl p-6">
+            <h4 class="font-semibold text-gray-200 mb-1">Waste by Cloud Provider</h4>
+            <p class="text-xs text-gray-400 mb-4">AWS (Amber) • Azure (Blue) • GCP (Green)</p>
+            <div class="h-64 flex items-center justify-center">
+              <canvas id="chart-provider-pie"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- PAGE 2: FOCUS INGESTION (TAB: focus) -->
+      <!-- ===================================================================== -->
+      <div id="tab-content-focus" class="tab-pane hidden space-y-6">
+        <!-- Back Navigation Bar -->
+        <div class="flex items-center justify-between pb-1">
+          <button onclick="switchTab('analytics')" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gray-800/80 hover:bg-gray-700 text-gray-300 hover:text-white border border-gray-700/60 text-xs font-semibold transition group shadow-sm">
+            <i data-lucide="arrow-left" class="w-4 h-4 transition-transform group-hover:-translate-x-1 text-indigo-400"></i>
+            <span>Back to Overview</span>
+          </button>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-indigo-950/40 border border-indigo-800/40 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center space-x-2">
+              <h3 class="text-sm font-bold text-indigo-200">FOCUS 1.0 Specification Billing Ingestion</h3>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Standard Compliant</span>
+            </div>
+            <p class="text-xs text-gray-400 mt-0.5">Ingesting normalized billing line items across AWS, Microsoft Azure, and Google Cloud with Billed Cost in INR (₹).</p>
+          </div>
+          <button onclick="injectSyntheticLeaks()" id="btn-inject-focus" class="px-4 py-2 text-xs font-bold rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-lg shadow-indigo-600/30 flex items-center space-x-1.5 transition">
+            <i data-lucide="zap" class="w-4 h-4"></i>
+            <span>Inject Telemetry Leaks</span>
+          </button>
+        </div>
+
+        <!-- Filter bar -->
+        <div class="flex items-center justify-between gap-4 bg-gray-900/60 p-3.5 rounded-2xl border border-gray-800 text-xs">
+          <div class="flex items-center space-x-2">
+            <span class="text-gray-400">Provider:</span>
+            <button onclick="filterFocusTable('')" id="ff-all" class="px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-medium">All</button>
+            <button onclick="filterFocusTable('AWS')" id="ff-aws" class="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 font-medium">AWS</button>
+            <button onclick="filterFocusTable('Azure')" id="ff-azure" class="px-2.5 py-1 rounded-lg bg-sky-500/20 text-sky-300 border border-sky-500/30 font-medium">Azure</button>
+            <button onclick="filterFocusTable('Google Cloud')" id="ff-gcp" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-medium">GCP</button>
+          </div>
+          <div class="text-gray-400" id="focus-record-count">Showing 11 line items</div>
+        </div>
+
+        <!-- FOCUS Records Table -->
+        <div class="glass-card rounded-2xl overflow-hidden border border-gray-800">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-gray-900/90 text-[11px] uppercase tracking-wider text-gray-400 border-b border-gray-800">
+                <tr>
+                  <th class="px-4 py-3.5">Provider & Region</th>
+                  <th class="px-4 py-3.5">Resource ID & Type</th>
+                  <th class="px-4 py-3.5">Charge Category</th>
+                  <th class="px-4 py-3.5">Telemetry Metrics</th>
+                  <th class="px-4 py-3.5">Tags</th>
+                  <th class="px-4 py-3.5 text-right">Billed Cost (INR)</th>
+                  <th class="px-4 py-3.5 text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody id="focus-table-body" class="divide-y divide-gray-800 text-gray-300">
+                <tr><td colspan="7" class="px-6 py-8 text-center text-gray-500">Loading FOCUS billing data...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- PAGE 3: RESOURCE TELEMETRY (TAB: resources) -->
+      <!-- ===================================================================== -->
+      <div id="tab-content-resources" class="tab-pane hidden space-y-6">
+        <!-- Back Navigation Bar -->
+        <div class="flex items-center justify-between pb-1">
+          <button onclick="switchTab('analytics')" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gray-800/80 hover:bg-gray-700 text-gray-300 hover:text-white border border-gray-700/60 text-xs font-semibold transition group shadow-sm">
+            <i data-lucide="arrow-left" class="w-4 h-4 transition-transform group-hover:-translate-x-1 text-emerald-400"></i>
+            <span>Back to Overview</span>
+          </button>
+        </div>
+
+        <!-- 4 Telemetry KPI Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="glass-card rounded-2xl p-5 border border-gray-800">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Compute Capacity</p>
+                <h3 id="res-stat-vcpus" class="text-2xl font-extrabold text-white mt-1">0 vCPUs</h3>
+                <p id="res-stat-ram" class="text-xs text-gray-400 mt-0.5">0.0 GB Total RAM</p>
+              </div>
+              <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
+                <i data-lucide="cpu" class="w-5 h-5"></i>
+              </div>
+            </div>
+            <div class="mt-4 pt-3 border-t border-gray-800/80 flex items-center justify-between text-xs text-gray-400">
+              <span>Fleet Avg CPU: <b id="res-stat-avg-cpu" class="text-indigo-400">0%</b></span>
+              <span>Avg RAM: <b id="res-stat-avg-mem" class="text-cyan-400">0%</b></span>
+            </div>
+          </div>
+
+          <div class="glass-card rounded-2xl p-5 border border-gray-800">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Storage Data Usage</p>
+                <h3 id="res-stat-storage-used" class="text-2xl font-extrabold text-emerald-400 mt-1">0 GB Used</h3>
+                <p id="res-stat-storage-prov" class="text-xs text-gray-400 mt-0.5">of 0 GB Provisioned</p>
+              </div>
+              <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                <i data-lucide="hard-drive" class="w-5 h-5"></i>
+              </div>
+            </div>
+            <div class="mt-4 pt-3 border-t border-gray-800/80 flex items-center justify-between text-xs text-gray-400">
+              <span>Storage Utilization:</span>
+              <span id="res-stat-storage-pct" class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30">0%</span>
+            </div>
+          </div>
+
+          <div class="glass-card rounded-2xl p-5 border border-gray-800">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Network Data Egress</p>
+                <h3 id="res-stat-network-out" class="text-2xl font-extrabold text-cyan-400 mt-1">0 GB Out</h3>
+                <p id="res-stat-network-in" class="text-xs text-gray-400 mt-0.5">0 GB Inbound Transfer</p>
+              </div>
+              <div class="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
+                <i data-lucide="activity" class="w-5 h-5"></i>
+              </div>
+            </div>
+            <div class="mt-4 pt-3 border-t border-gray-800/80 flex items-center justify-between text-xs text-gray-400">
+              <span>Total Bandwidth:</span>
+              <span id="res-stat-data-total" class="text-cyan-300 font-bold">0 GB Total</span>
+            </div>
+          </div>
+
+          <div class="glass-card rounded-2xl p-5 border border-gray-800">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Tracked Fleet Assets</p>
+                <h3 id="res-stat-total-count" class="text-2xl font-extrabold text-amber-400 mt-1">0 Assets</h3>
+                <p id="res-stat-total-cost" class="text-xs text-amber-300/80 mt-0.5">₹0.00 / month total</p>
+              </div>
+              <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+                <i data-lucide="layers" class="w-5 h-5"></i>
+              </div>
+            </div>
+            <div class="mt-4 pt-3 border-t border-gray-800/80 flex items-center space-x-1 text-[11px]" id="res-provider-pills">
+              <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">AWS: 0</span>
+              <span class="px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30">Azure: 0</span>
+              <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">GCP: 0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter Toolbar -->
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-4 bg-gray-900/60 p-4 rounded-2xl border border-gray-800">
+          <div class="flex flex-wrap items-center gap-2 text-xs font-semibold">
+            <span class="text-gray-400 mr-2 flex items-center"><i data-lucide="filter" class="w-3.5 h-3.5 mr-1"></i> Cloud:</span>
+            <button onclick="filterResources('provider', '')" id="rf-prov-all" class="px-3 py-1.5 rounded-xl bg-indigo-600 text-white font-medium transition shadow">All Clouds</button>
+            <button onclick="filterResources('provider', 'aws')" id="rf-prov-aws" class="px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 hover:text-white font-medium transition border border-amber-500/30">AWS</button>
+            <button onclick="filterResources('provider', 'azure')" id="rf-prov-azure" class="px-3 py-1.5 rounded-xl bg-sky-500/20 text-sky-300 hover:text-white font-medium transition border border-sky-500/30">Azure</button>
+            <button onclick="filterResources('provider', 'gcp')" id="rf-prov-gcp" class="px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 hover:text-white font-medium transition border border-emerald-500/30">GCP</button>
+
+            <span class="text-gray-600 mx-1">|</span>
+
+            <button onclick="filterResources('type', '')" id="rf-type-all" class="px-3 py-1.5 rounded-xl bg-indigo-600 text-white font-medium transition shadow">All Types</button>
+            <button onclick="filterResources('type', 'compute_instance')" id="rf-type-compute" class="px-3 py-1.5 rounded-xl bg-gray-800 text-gray-300 hover:text-white font-medium transition border border-gray-700">Compute</button>
+            <button onclick="filterResources('type', 'block_storage')" id="rf-type-storage" class="px-3 py-1.5 rounded-xl bg-gray-800 text-gray-300 hover:text-white font-medium transition border border-gray-700">Storage</button>
+            <button onclick="filterResources('type', 'ip_address')" id="rf-type-ip" class="px-3 py-1.5 rounded-xl bg-gray-800 text-gray-300 hover:text-white font-medium transition border border-gray-700">IPs</button>
+          </div>
+
+          <div class="relative w-full sm:w-72">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
+              <i data-lucide="search" class="w-4 h-4"></i>
+            </span>
+            <input type="text" id="resource-search-input" oninput="handleResourceSearch(this.value)" placeholder="Search name, ID, or region..." class="w-full bg-gray-950 border border-gray-800 rounded-xl pl-9 pr-3 py-1.5 text-xs text-gray-100 placeholder-gray-500 focus:outline-none focus:border-indigo-500">
+          </div>
+        </div>
+
+        <!-- Resources Table -->
+        <div class="glass-card rounded-2xl overflow-hidden border border-gray-800">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+              <thead class="bg-gray-900/90 text-[11px] uppercase tracking-wider text-gray-400 border-b border-gray-800">
+                <tr>
+                  <th class="px-5 py-3.5">Cloud Asset</th>
+                  <th class="px-5 py-3.5">Type & Environment</th>
+                  <th class="px-5 py-3.5">State</th>
+                  <th class="px-5 py-3.5">Compute Load</th>
+                  <th class="px-5 py-3.5">Storage Data Usage</th>
+                  <th class="px-5 py-3.5">Network Data Transfer</th>
+                  <th class="px-5 py-3.5 text-right">Cost (INR)</th>
+                </tr>
+              </thead>
+              <tbody id="resources-table-body" class="divide-y divide-gray-800 text-xs text-gray-300">
+                <tr>
+                  <td colspan="7" class="px-6 py-8 text-center text-gray-500">Loading multi-cloud resource inventory...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- PAGE 4: RUNNING SYSTEM CPU TRACES (TAB: traces) -->
+      <!-- ===================================================================== -->
+      <div id="tab-content-traces" class="tab-pane hidden space-y-6">
+        <!-- Back Navigation Bar -->
+        <div class="flex items-center justify-between pb-1">
+          <button onclick="switchTab('analytics')" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gray-800/80 hover:bg-gray-700 text-gray-300 hover:text-white border border-gray-700/60 text-xs font-semibold transition group shadow-sm">
+            <i data-lucide="arrow-left" class="w-4 h-4 transition-transform group-hover:-translate-x-1 text-cyan-400"></i>
+            <span>Back to Overview</span>
+          </button>
+        </div>
+
+        <!-- Live System Host Banner -->
+        <div class="p-4 rounded-2xl bg-cyan-950/40 border border-cyan-800/40 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center space-x-2">
+              <h3 class="text-sm font-bold text-cyan-200">Running System CPU Utilization (High-Resolution Traces)</h3>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 flex items-center">
+                <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 mr-1.5 animate-ping"></span>
+                Active Running Host
+              </span>
+            </div>
+            <p class="text-xs text-gray-400 mt-1">Real-time hardware CPU telemetry measured directly from this active host operating system kernel. High-frequency 5-minute temporal traces evaluate idle resource thresholds (&lt; 10%) and workload spikes.</p>
+          </div>
+          <div class="flex items-center space-x-2 shrink-0">
+            <span id="trace-system-info-pill" class="text-xs px-3 py-1.5 rounded-xl bg-gray-900 border border-gray-700 text-gray-300 font-mono">
+              Detecting Host Hardware...
+            </span>
+            <button onclick="loadVmTraceChart(true)" id="btn-refresh-cpu" class="px-3.5 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold shadow-md shadow-cyan-600/20 flex items-center space-x-1.5 transition">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+              <span>Sample Now</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 4 Real-time Host Metrics Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="glass-card rounded-2xl p-4 border border-cyan-500/30">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="text-[11px] font-medium text-gray-400 uppercase tracking-wider">Live System CPU</p>
+                <h3 id="trace-live-cpu" class="text-2xl font-black text-cyan-400 mt-1">0.0%</h3>
+              </div>
+              <div class="w-9 h-9 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
+                <i data-lucide="cpu" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <p class="text-[11px] text-gray-400 mt-2 flex items-center">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
+              Direct Kernel Reading
+            </p>
+          </div>
+
+          <div class="glass-card rounded-2xl p-4 border border-gray-800">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="text-[11px] font-medium text-gray-400 uppercase tracking-wider">24h Mean CPU</p>
+                <h3 id="trace-mean-cpu" class="text-2xl font-black text-white mt-1">0.0%</h3>
+              </div>
+              <div class="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center font-bold text-xs">
+                AVG
+              </div>
+            </div>
+            <p class="text-[11px] text-gray-400 mt-2">Rolling temporal average</p>
+          </div>
+
+          <div class="glass-card rounded-2xl p-4 border border-gray-800">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="text-[11px] font-medium text-gray-400 uppercase tracking-wider">95th Percentile (P95)</p>
+                <h3 id="trace-p95-cpu" class="text-2xl font-black text-amber-400 mt-1">0.0%</h3>
+              </div>
+              <div class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold text-xs">
+                P95
+              </div>
+            </div>
+            <p class="text-[11px] text-gray-400 mt-2">Peak burst headroom metric</p>
+          </div>
+
+          <div class="glass-card rounded-2xl p-4 border border-gray-800">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="text-[11px] font-medium text-gray-400 uppercase tracking-wider">FinOps Workload State</p>
+                <div class="mt-1.5">
+                  <span id="trace-class-badge" class="px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    ANALYZING...
+                  </span>
+                </div>
+              </div>
+              <div class="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
+                <i data-lucide="shield-check" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <p class="text-[11px] text-gray-400 mt-2">Idle Threshold: &lt; 10% CPU</p>
+          </div>
+        </div>
+
+        <!-- Chart Container -->
+        <div class="glass-card rounded-2xl p-6 border border-gray-800">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
+            <div>
+              <h4 class="font-bold text-gray-200 text-sm" id="trace-chart-title">Running Host System CPU Trace (24-Hour Time Series, 5-Min Granularity)</h4>
+              <p class="text-xs text-gray-400 mt-0.5">
+                <span class="text-cyan-400 font-semibold">Cyan Solid Line:</span> Measured Host System CPU % &bull;
+                <span class="text-amber-400 font-semibold">Orange Dotted:</span> P95 Peak CPU &bull;
+                <span class="text-rose-400 font-semibold">Red Dashed:</span> 10% FinOps Idle Baseline
+              </p>
+            </div>
+            <div class="flex items-center space-x-2 text-xs text-gray-400 font-mono" id="trace-last-updated">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>Live Tracking</span>
+            </div>
+          </div>
+          <div class="h-72">
+            <canvas id="chart-cpu-traces"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- PAGE 5: WASTE FINDINGS & ML (TAB: findings) -->
+      <!-- ===================================================================== -->
+      <div id="tab-content-findings" class="tab-pane hidden space-y-4">
+        <!-- Back Navigation Bar -->
+        <div class="flex items-center justify-between pb-1">
+          <button onclick="switchTab('analytics')" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gray-800/80 hover:bg-gray-700 text-gray-300 hover:text-white border border-gray-700/60 text-xs font-semibold transition group shadow-sm">
+            <i data-lucide="arrow-left" class="w-4 h-4 transition-transform group-hover:-translate-x-1 text-amber-400"></i>
+            <span>Back to Overview</span>
+          </button>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div class="flex items-center space-x-3 text-xs">
+            <span class="text-gray-400">Provider:</span>
+            <select id="filter-provider" onchange="fetchFindings()" class="bg-gray-800 border border-gray-700 rounded-lg px-2.5 py-1.5 text-gray-200">
+              <option value="">All Clouds</option>
+              <option value="aws">AWS (Amazon)</option>
+              <option value="azure">Azure (Microsoft)</option>
+              <option value="gcp">GCP (Google)</option>
+            </select>
+
+            <span class="text-gray-400 ml-2">Risk Level:</span>
+            <select id="filter-risk" onchange="fetchFindings()" class="bg-gray-800 border border-gray-700 rounded-lg px-2.5 py-1.5 text-gray-200">
+              <option value="">All Risk Levels</option>
+              <option value="LOW">Low (Auto-Remediate)</option>
+              <option value="MEDIUM">Medium (Approval)</option>
+              <option value="HIGH">High (Critical)</option>
+            </select>
+
+            <button onclick="clearFindingsFilters()" class="px-2.5 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 text-xs flex items-center space-x-1 transition shadow-sm" title="Clear Filters">
+              <i data-lucide="x" class="w-3.5 h-3.5"></i>
+              <span>Clear Filters</span>
+            </button>
+          </div>
+          <div class="text-xs text-gray-400" id="findings-count-text">Showing 0 findings</div>
+        </div>
+
+        <div class="glass-card rounded-2xl overflow-hidden border border-gray-800">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-gray-900/80 text-xs uppercase text-gray-400 border-b border-gray-800">
+              <tr>
+                <th class="px-6 py-4">Resource & Provider</th>
+                <th class="px-6 py-4">Detection & Reason</th>
+                <th class="px-6 py-4">Risk Assessment</th>
+                <th class="px-6 py-4">Est. Savings</th>
+                <th class="px-6 py-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="findings-table-body" class="divide-y divide-gray-800">
+              <tr>
+                <td colspan="5" class="px-6 py-8 text-center text-gray-500">No findings loaded.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+
+
+      <!-- ===================================================================== -->
+      <!-- ===================================================================== -->
+      <!-- PAGE 6: RISK CLASSIFIER SANDBOX (TAB: simulator) -->
+      <!-- ===================================================================== -->
+      <div id="tab-content-simulator" class="tab-pane hidden space-y-6">
+        <!-- Back Navigation Bar -->
+        <div class="flex items-center justify-between pb-1">
+          <button onclick="switchTab('analytics')" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gray-800/80 hover:bg-gray-700 text-gray-300 hover:text-white border border-gray-700/60 text-xs font-semibold transition group shadow-sm">
+            <i data-lucide="arrow-left" class="w-4 h-4 transition-transform group-hover:-translate-x-1 text-rose-400"></i>
+            <span>Back to Overview</span>
+          </button>
+          <div class="flex items-center space-x-2">
+            <button onclick="resetRiskSandbox()" class="px-3 py-1.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-semibold border border-gray-700 transition flex items-center space-x-1">
+              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 mr-1 text-cyan-400"></i>
+              <span>Reset to Baseline</span>
+            </button>
+            <button onclick="switchTab('findings')" class="px-3 py-1.5 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 border border-indigo-500/40 text-xs font-semibold transition flex items-center space-x-1">
+              <i data-lucide="alert-triangle" class="w-3.5 h-3.5 mr-1 text-amber-400"></i>
+              <span>View Fleet Findings</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-6 border border-cyan-500/30">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="text-lg font-bold text-cyan-400 flex items-center">
+                <i data-lucide="sliders" class="w-5 h-5 mr-2"></i>
+                Interactive Multi-Factor Risk Classifier Sandbox (Core Contribution)
+              </h3>
+              <p class="text-xs text-gray-400">Test the core contribution algorithm live with custom parameters and see the real-time routing decision.</p>
+            </div>
+            <span class="text-xs px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-mono">Algorithm v1.0</span>
+          </div>
+
+          <!-- Real Fleet Finding Selector & Quick Scenario Presets -->
+          <div class="mb-5 p-4 rounded-xl bg-gray-900/90 border border-gray-800 space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <label for="sim-fleet-finding" class="text-xs font-bold text-cyan-300 flex items-center">
+                <i data-lucide="database" class="w-4 h-4 mr-1.5 text-cyan-400"></i>
+                Select Real Fleet Finding to Test:
+              </label>
+              <select id="sim-fleet-finding" onchange="loadFleetFinding(this.value)" class="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-gray-200 focus:outline-none focus:border-cyan-500 max-w-md w-full">
+                <option value="">-- Choose a live finding from fleet (Auto-fills below) --</option>
+              </select>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-gray-800/80 text-xs">
+              <span class="text-gray-400 font-semibold flex items-center">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5 mr-1.5 text-cyan-400"></i>
+                Or Standard Scenario Presets:
+              </span>
+              <div class="flex flex-wrap items-center gap-2">
+                <button type="button" onclick="loadRiskPreset('high')" class="px-3 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 font-semibold transition text-xs">
+                  🔴 High Risk (Prod DB + ALB)
+                </button>
+                <button type="button" onclick="loadRiskPreset('medium')" class="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 font-semibold transition text-xs">
+                  🟡 Medium Risk (Staging VM + Mount)
+                </button>
+                <button type="button" onclick="loadRiskPreset('low')" class="px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-semibold transition text-xs">
+                  🟢 Low Risk (Dev + Unattached IP)
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="space-y-4 text-sm">
+              <div>
+                <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">1. Environment Tag (Weight: 40%, Max: 45 pts)</label>
+                <select id="sim-env" onchange="runSandboxEvaluation()" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-gray-200">
+                  <option value="production">Production / Mission-Critical (+45 pts)</option>
+                  <option value="staging">Staging / Pre-prod (+20 pts)</option>
+                  <option value="dev" selected>Development / Test / Sandbox (+5 pts)</option>
+                  <option value="unknown">Untagged / Unknown (+25 pts)</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">2. Topology & Dependency (Weight: 30%, Max: 35 pts)</label>
+                <select id="sim-topo" onchange="runSandboxEvaluation()" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-gray-200">
+                  <option value="none" selected>Standalone / Verified Unattached (0 pts)</option>
+                  <option value="lb">Active behind Application Load Balancer (+35 pts)</option>
+                  <option value="mount">Has active volume mount dependencies (+25 pts)</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">3. Proposed Remediation Action (Weight: 20%, Max: 20 pts)</label>
+                <select id="sim-action" onchange="runSandboxEvaluation()" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-gray-200">
+                  <option value="delete_volume">Delete Unattached Volume (Snapshot required) (+20 pts)</option>
+                  <option value="stop_instance">Stop Compute Instance (Reversible) (+15 pts)</option>
+                  <option value="release_ip">Release Unassociated Public IP (+5 pts)</option>
+                  <option value="schedule_stop">Configure Off-Hours Schedule (+5 pts)</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">
+                  4. 7-Day Average CPU Utilization (%)
+                </label>
+                <div class="flex items-center space-x-2">
+                  <div class="relative flex-1">
+                    <input type="number" id="sim-cpu" min="0" max="100" step="0.5" value="3.5" oninput="runSandboxEvaluation()" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-gray-200 text-sm focus:outline-none focus:border-cyan-500 font-mono">
+                    <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 text-xs font-mono">% CPU</span>
+                  </div>
+                  <span id="sim-cpu-badge" class="px-2.5 py-2 rounded-lg text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono whitespace-nowrap">
+                    Deep Idle (-5 pts)
+                  </span>
+                </div>
+                <!-- Quick Preset Buttons (No moving slider bar) -->
+                <div class="flex flex-wrap gap-1.5 mt-2">
+                  <button type="button" onclick="setSimCpu(1.5)" class="px-2.5 py-1 rounded bg-gray-800 hover:bg-gray-700 text-[11px] text-gray-300 border border-gray-700 transition">1.5% (Deep Idle -5 pts)</button>
+                  <button type="button" onclick="setSimCpu(4.0)" class="px-2.5 py-1 rounded bg-gray-800 hover:bg-gray-700 text-[11px] text-gray-300 border border-gray-700 transition">4.0% (Typical 0 pts)</button>
+                  <button type="button" onclick="setSimCpu(8.5)" class="px-2.5 py-1 rounded bg-gray-800 hover:bg-gray-700 text-[11px] text-gray-300 border border-gray-700 transition">8.5% (Near Cutoff +10 pts)</button>
+                  <button type="button" onclick="setSimCpu(25.0)" class="px-2.5 py-1 rounded bg-gray-800 hover:bg-gray-700 text-[11px] text-gray-300 border border-gray-700 transition">25.0% (Active)</button>
+                </div>
+              </div>
+
+              <button type="button" onclick="runSandboxEvaluation()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md shadow-cyan-600/20 flex items-center justify-center space-x-1.5 transition">
+                <i data-lucide="check-circle" class="w-4 h-4"></i>
+                <span>Evaluate Risk Score & Routing</span>
+              </button>
+            </div>
+
+            <div class="p-6 rounded-2xl bg-gray-900 border border-gray-800 flex flex-col justify-between">
+              <div>
+                <div class="text-xs uppercase font-medium text-gray-400 mb-1">Computed Blast Radius Risk Score</div>
+                <div class="flex items-baseline space-x-3">
+                  <span id="sim-score" class="text-5xl font-black text-white">10.0</span>
+                  <span class="text-gray-500">/ 100</span>
+                  <span id="sim-badge" class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">LOW RISK</span>
+                </div>
+
+                <!-- 3-Tier Visual Gauge Bar (Discrete Segments - No Moving Sliders) -->
+                <div class="mt-4 space-y-1.5">
+                  <div class="flex justify-between text-[11px] font-semibold">
+                    <span id="tier-label-low" class="text-emerald-400 font-bold">Low (0-34)</span>
+                    <span id="tier-label-med" class="text-gray-500">Medium (35-69)</span>
+                    <span id="tier-label-high" class="text-gray-500">High (70-100)</span>
+                  </div>
+                  <div class="grid grid-cols-3 gap-1.5 h-3">
+                    <div id="meter-low" class="rounded-l-full bg-emerald-500 shadow-md shadow-emerald-500/40 border border-emerald-400 transition-all"></div>
+                    <div id="meter-med" class="bg-gray-800 border border-gray-700 opacity-40 transition-all"></div>
+                    <div id="meter-high" class="rounded-r-full bg-gray-800 border border-gray-700 opacity-40 transition-all"></div>
+                  </div>
+                  <div class="flex justify-between text-[10px] text-gray-400">
+                    <span>Zero-Touch Auto</span>
+                    <span>Approval Queue</span>
+                    <span>Snapshot & Authorization</span>
+                  </div>
+                </div>
+
+                <div class="mt-4 p-3 rounded-lg bg-gray-800/60 border border-gray-700 text-xs text-gray-300" id="sim-routing-desc">
+                  Eligible for automated remediation. Zero customer disruption risk.
+                </div>
+
+                <div class="mt-4 space-y-2 text-xs">
+                  <div class="text-gray-400 font-semibold uppercase">Factor Contribution Breakdown:</div>
+                  <div id="sim-factors-list" class="space-y-1.5 text-gray-300"></div>
+                </div>
+              </div>
+
+              <div class="mt-6 pt-4 border-t border-gray-800 flex items-center justify-between text-xs text-gray-400">
+                <span>Thresholds: Low &lt; 35 | Med 35-69 | High &ge; 70</span>
+                <span class="text-cyan-400 font-medium">Safe Governance Pipeline</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- PAGE 7: APPROVALS & ROLLBACK (TAB: approvals) -->
+      <!-- ===================================================================== -->
+      <div id="tab-content-approvals" class="tab-pane hidden space-y-6">
+        <!-- Back Navigation Bar -->
+        <div class="flex items-center justify-between pb-1">
+          <button onclick="switchTab('analytics')" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gray-800/80 hover:bg-gray-700 text-gray-300 hover:text-white border border-gray-700/60 text-xs font-semibold transition group shadow-sm">
+            <i data-lucide="arrow-left" class="w-4 h-4 transition-transform group-hover:-translate-x-1 text-indigo-400"></i>
+            <span>Back to Overview</span>
+          </button>
+        </div>
+
+        <div class="p-4 rounded-xl bg-indigo-950/40 border border-indigo-800/40 text-xs flex items-center justify-between">
+          <div class="flex items-center space-x-2 text-indigo-300">
+            <i data-lucide="shield" class="w-4 h-4"></i>
+            <span>Medium and High Risk findings require human review before executing actions. Actions generate mandatory pre-action snapshots with 1-click rollback recovery.</span>
+          </div>
+        </div>
+
+        <!-- Section 1: Pending Governance Approvals Queue -->
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="font-bold text-gray-200 text-sm flex items-center">
+              <i data-lucide="user-check" class="w-4 h-4 mr-2 text-amber-400"></i>
+              Pending Governance Approvals Queue
+            </h4>
+            <span id="approvals-badge-text" class="text-xs text-amber-400 font-semibold">0 Awaiting Review</span>
+          </div>
+          <div id="approvals-container" class="space-y-4">
+            <!-- Rendered approval cards -->
+          </div>
+        </div>
+
+        <!-- Section 2: Executed Remediations & Snapshot Rollback Vault -->
+        <div class="pt-4">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="font-bold text-gray-200 text-sm flex items-center">
+              <i data-lucide="history" class="w-4 h-4 mr-2 text-emerald-400"></i>
+              Executed Remediations & Pre-Action Snapshot Vault
+            </h4>
+            <span class="text-xs text-emerald-400 font-semibold">Safe Execution Engine</span>
+          </div>
+
+          <div class="glass-card rounded-2xl overflow-hidden border border-gray-800">
+            <table class="w-full text-left text-sm">
+              <thead class="bg-gray-900/80 text-xs uppercase text-gray-400 border-b border-gray-800">
+                <tr>
+                  <th class="px-6 py-4">Action ID</th>
+                  <th class="px-6 py-4">Resource & Provider</th>
+                  <th class="px-6 py-4">Action Type</th>
+                  <th class="px-6 py-4">Pre-Action Snapshot</th>
+                  <th class="px-6 py-4">Lifecycle State</th>
+                  <th class="px-6 py-4 text-right">Fail-Safe Rollback</th>
+                </tr>
+              </thead>
+              <tbody id="remediations-table-body" class="divide-y divide-gray-800">
+                <tr>
+                  <td colspan="6" class="px-6 py-8 text-center text-gray-500">Loading executed remediations...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- PAGE 8: AUDIT TRAIL (TAB: audit) -->
+      <!-- ===================================================================== -->
+      <div id="tab-content-audit" class="tab-pane hidden space-y-4">
+        <!-- Back Navigation Bar -->
+        <div class="flex items-center justify-between pb-1">
+          <button onclick="switchTab('analytics')" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gray-800/80 hover:bg-gray-700 text-gray-300 hover:text-white border border-gray-700/60 text-xs font-semibold transition group shadow-sm">
+            <i data-lucide="arrow-left" class="w-4 h-4 transition-transform group-hover:-translate-x-1 text-gray-400"></i>
+            <span>Back to Overview</span>
+          </button>
+        </div>
+
+        <div class="glass-card rounded-2xl overflow-hidden border border-gray-800">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-gray-900/80 text-xs uppercase text-gray-400 border-b border-gray-800">
+              <tr>
+                <th class="px-6 py-4">Timestamp</th>
+                <th class="px-6 py-4">Event Type</th>
+                <th class="px-6 py-4">Actor</th>
+                <th class="px-6 py-4">Provider & Resource</th>
+                <th class="px-6 py-4">Event Metadata</th>
+              </tr>
+            </thead>
+            <tbody id="audit-table-body" class="divide-y divide-gray-800">
+              <tr>
+                <td colspan="5" class="px-6 py-8 text-center text-gray-500">No audit events recorded yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- MODAL: MONTHLY WASTE & SAVINGS CLEAR OPTIONS -->
+      <!-- ===================================================================== -->
+      <div id="modal-clear-options" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="glass-card max-w-lg w-full rounded-2xl p-6 border border-gray-700 shadow-2xl relative space-y-5">
+          <div class="flex justify-between items-start border-b border-gray-800 pb-4">
+            <div>
+              <h3 class="text-base font-bold text-white flex items-center">
+                <i data-lucide="sliders-horizontal" class="w-5 h-5 mr-2 text-indigo-400"></i>
+                Monthly Waste & Savings Clear Options
+              </h3>
+              <p class="text-xs text-gray-400 mt-1">Select an action below to clear or reset metrics for your live demonstration.</p>
+            </div>
+            <button onclick="closeClearModal()" class="text-gray-400 hover:text-white px-2.5 py-1.5 rounded-lg hover:bg-gray-800 transition flex items-center text-xs font-semibold">
+              <i data-lucide="arrow-left" class="w-4 h-4 mr-1 text-indigo-400"></i>
+              <span>Back</span>
+            </button>
+          </div>
+
+          <div class="space-y-3 text-xs">
+            <!-- Option 1: Clear Realized Savings -->
+            <div class="p-4 rounded-xl bg-gray-900/80 border border-emerald-500/30 flex items-center justify-between gap-4">
+              <div>
+                <div class="font-bold text-emerald-400 flex items-center">
+                  <i data-lucide="eraser" class="w-4 h-4 mr-1.5"></i>
+                  Clear Realized Savings Ledger (Set to ₹0.00)
+                </div>
+                <p class="text-gray-400 text-[11px] mt-1">Rolls back executed actions and resets confirmed savings to ₹0.00 so you can demonstrate live savings accrual.</p>
+              </div>
+              <button onclick="clearRealizedSavings()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold shrink-0 transition shadow">
+                Clear Savings
+              </button>
+            </div>
+
+            <!-- Option 2: Reopen All Waste Findings -->
+            <div class="p-4 rounded-xl bg-gray-900/80 border border-amber-500/30 flex items-center justify-between gap-4">
+              <div>
+                <div class="font-bold text-amber-400 flex items-center">
+                  <i data-lucide="rotate-ccw" class="w-4 h-4 mr-1.5"></i>
+                  Reset / Re-open All Waste Findings
+                </div>
+                <p class="text-gray-400 text-[11px] mt-1">Re-opens all remediated waste findings and approval requests across AWS, Azure, and GCP.</p>
+              </div>
+              <button onclick="reopenAllWaste()" class="px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold shrink-0 transition shadow">
+                Reset Waste
+              </button>
+            </div>
+
+            <!-- Option 3: Clear Filters -->
+            <div class="p-4 rounded-xl bg-gray-900/80 border border-blue-500/30 flex items-center justify-between gap-4">
+              <div>
+                <div class="font-bold text-blue-400 flex items-center">
+                  <i data-lucide="filter-x" class="w-4 h-4 mr-1.5"></i>
+                  Clear All Search & View Filters
+                </div>
+                <p class="text-gray-400 text-[11px] mt-1">Resets provider and risk level dropdowns back to show all items across the platform.</p>
+              </div>
+              <button onclick="clearAllFilters()" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold shrink-0 transition shadow">
+                Clear Filters
+              </button>
+            </div>
+
+            <!-- Option 4: Factory Reset -->
+            <div class="p-4 rounded-xl bg-gray-900/80 border border-rose-500/30 flex items-center justify-between gap-4">
+              <div>
+                <div class="font-bold text-rose-400 flex items-center">
+                  <i data-lucide="refresh-cw" class="w-4 h-4 mr-1.5"></i>
+                  Clean Factory Reset & Re-Seed
+                </div>
+                <p class="text-gray-400 text-[11px] mt-1">Wipes current demo database and performs an end-to-end fresh re-scan of the multi-cloud fleet.</p>
+              </div>
+              <button onclick="factoryResetAndReseed()" class="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold shrink-0 transition shadow">
+                Factory Reset
+              </button>
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-gray-800 flex justify-between items-center">
+            <button onclick="closeClearModal()" class="px-4 py-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-semibold transition flex items-center">
+              <i data-lucide="arrow-left" class="w-4 h-4 mr-1.5 text-indigo-400"></i>
+              <span>Back to Overview</span>
+            </button>
+            <button onclick="closeClearModal()" class="px-4 py-2 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 text-xs font-semibold transition">
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <footer class="glass-card border-t border-gray-800 py-4 px-6 text-center text-xs text-gray-500">
+      CloudOptima Multi-Cloud Waste Detection & Risk Governance &bull; Read-Only IAM Default &bull; Pre-Action Snapshots &bull; Verifier & Rollback Engine
+    </footer>
+  </div>
+
+  <!-- Application Logic -->
+  <script>
+    let currentUser = null;
+    let savingsTrendChart = null;
+    let providerPieChart = null;
+    let cpuTraceChart = null;
+    let cachedFocusRecords = [];
+    let cachedResources = [];
+    let liveCpuMonitorTimer = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+      checkSession();
+      runSandboxEvaluation();
+    });
+
+    function checkSession() {
+      const stored = localStorage.getItem('cloudoptima_user');
+      if (stored) {
+        try {
+          currentUser = JSON.parse(stored);
+          showDashboard(currentUser);
+          return;
+        } catch (e) {
+          localStorage.removeItem('cloudoptima_user');
+        }
+      }
+      showLoginView();
+    }
+
+    function selectLoginRole(role) {
+      const tabAdmin = document.getElementById('role-tab-admin');
+      const tabApprover = document.getElementById('role-tab-approver');
+      const userInput = document.getElementById('login-username');
+      const passInput = document.getElementById('login-password');
+
+      if (role === 'admin') {
+        tabAdmin.className = "flex-1 py-2 rounded-lg bg-indigo-600 text-white transition flex items-center justify-center space-x-1.5 shadow";
+        tabApprover.className = "flex-1 py-2 rounded-lg text-gray-400 hover:text-gray-200 transition flex items-center justify-center space-x-1.5";
+        userInput.value = "admin";
+        passInput.value = "admin123";
+      } else {
+        tabApprover.className = "flex-1 py-2 rounded-lg bg-amber-600 text-white transition flex items-center justify-center space-x-1.5 shadow";
+        tabAdmin.className = "flex-1 py-2 rounded-lg text-gray-400 hover:text-gray-200 transition flex items-center justify-center space-x-1.5";
+        userInput.value = "approver";
+        passInput.value = "approver123";
+      }
+      lucide.createIcons();
+    }
+
+    function quickLogin(username, password) {
+      document.getElementById('login-username').value = username;
+      document.getElementById('login-password').value = password;
+      performLogin(username, password);
+    }
+
+    function handleManualLogin(e) {
+      e.preventDefault();
+      const u = document.getElementById('login-username').value.trim();
+      const p = document.getElementById('login-password').value.trim();
+      performLogin(u, p);
+    }
+
+    async function performLogin(username, password) {
+      const errBox = document.getElementById('login-error-msg');
+      errBox.classList.add('hidden');
+      const submitBtn = document.getElementById('btn-login-submit');
+      submitBtn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i><span>Signing In...</span>`;
+      lucide.createIcons();
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || "Authentication failed");
+        }
+
+        const data = await res.json();
+        currentUser = data.user;
+        currentUser.token = data.access_token;
+        localStorage.setItem('cloudoptima_user', JSON.stringify(currentUser));
+        localStorage.setItem('cloudoptima_token', data.access_token);
+
+        showDashboard(currentUser);
+      } catch (err) {
+        errBox.textContent = err.message;
+        errBox.classList.remove('hidden');
+      } finally {
+        submitBtn.innerHTML = `<span>Sign In to CloudOptima</span><i data-lucide="arrow-right" class="w-4 h-4"></i>`;
+        lucide.createIcons();
+      }
+    }
+
+    function handleLogout() {
+      currentUser = null;
+      localStorage.removeItem('cloudoptima_user');
+      localStorage.removeItem('cloudoptima_token');
+      showLoginView();
+    }
+
+    function showLoginView() {
+      document.getElementById('login-view').classList.remove('hidden');
+      document.getElementById('dashboard-view').classList.add('hidden');
+      lucide.createIcons();
+    }
+
+    function showDashboard(user) {
+      document.getElementById('login-view').classList.add('hidden');
+      document.getElementById('dashboard-view').classList.remove('hidden');
+
+      document.getElementById('user-display-name').textContent = user.full_name || user.username;
+      document.getElementById('user-display-role').textContent = user.role.toUpperCase();
+
+      const roleBadge = document.getElementById('header-role-badge');
+      const banner = document.getElementById('role-welcome-banner');
+      const bannerTitle = document.getElementById('role-banner-title');
+      const bannerDesc = document.getElementById('role-banner-desc');
+
+      if (user.role === 'admin') {
+        roleBadge.className = "text-xs px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-semibold uppercase";
+        roleBadge.textContent = "Admin Portal";
+
+        banner.className = "p-4 rounded-2xl bg-indigo-950/40 border border-indigo-800/40 text-xs flex items-center justify-between";
+        bannerTitle.className = "font-bold text-sm text-indigo-200 block";
+        bannerTitle.textContent = "Cloud Operations Admin Portal";
+        bannerDesc.textContent = "Full multi-cloud management enabled: fleet discovery, FOCUS 1.0 normalization, ML surge alerts, and remediation lifecycles.";
+
+        document.querySelectorAll('.admin-tab').forEach(el => el.classList.remove('hidden'));
+        document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+        switchTab('analytics');
+      } else {
+        roleBadge.className = "text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold uppercase";
+        roleBadge.textContent = "Approver Portal";
+
+        banner.className = "p-4 rounded-2xl bg-amber-950/40 border border-amber-800/40 text-xs flex items-center justify-between";
+        bannerTitle.className = "font-bold text-sm text-amber-200 block";
+        bannerTitle.textContent = "Governance Approver Portal";
+        bannerDesc.textContent = "Review medium and high-risk findings, verify blast radius factor scores, and approve actions with safety snapshots.";
+
+        document.querySelectorAll('.admin-tab').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
+        switchTab('approvals');
+      }
+
+      refreshAllData();
+      lucide.createIcons();
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(el => {
+        el.classList.remove('tab-active');
+        el.classList.add('text-gray-400');
+      });
+
+      const targetPane = document.getElementById(`tab-content-${tabId}`);
+      const targetBtn = document.getElementById(`tab-btn-${tabId}`);
+      if (targetPane) targetPane.classList.remove('hidden');
+      if (targetBtn) {
+        targetBtn.classList.add('tab-active');
+        targetBtn.classList.remove('text-gray-400');
+      }
+
+      if (tabId === 'analytics') {
+        fetchDashboardStats();
+        fetchSavingsHistory();
+      } else if (tabId === 'focus') {
+        fetchFocusData();
+      } else if (tabId === 'resources') {
+        fetchResourceTelemetry();
+        fetchResourcesList();
+        stopLiveSystemCpuMonitor();
+      } else if (tabId === 'traces') {
+        loadVmTraceChart();
+        startLiveSystemCpuMonitor();
+      } else {
+        stopLiveSystemCpuMonitor();
+        if (tabId === 'findings') {
+          fetchFindings();
+        } else if (tabId === 'simulator') {
+          runSandboxEvaluation();
+        } else if (tabId === 'approvals') {
+          fetchApprovals();
+          fetchRemediations();
+        } else if (tabId === 'audit') {
+          fetchAuditLogs();
+        }
+      }
+      lucide.createIcons();
+    }
+
+    function refreshAllData() {
+      fetchDashboardStats();
+      fetchSavingsHistory();
+      fetchFocusData();
+      fetchResourceTelemetry();
+      fetchResourcesList();
+      fetchFindings();
+      fetchApprovals();
+      fetchRemediations();
+      fetchAuditLogs();
+      runSandboxEvaluation();
+    }
+
+    // Clear & Reset Functions
+    function openClearModal() {
+      const modal = document.getElementById('modal-clear-options');
+      if (modal) {
+        modal.classList.remove('hidden');
+        lucide.createIcons();
+      }
+    }
+
+    function closeClearModal() {
+      const modal = document.getElementById('modal-clear-options');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    async function clearRealizedSavings() {
+      if (!confirm("Are you sure you want to clear the Realized Savings ledger? This will reset confirmed savings to ₹0.00 so you can demonstrate live savings from scratch.")) {
+        return;
+      }
+      try {
+        const res = await fetch('/api/savings/clear-realized', { method: 'POST' });
+        const data = await res.json();
+        alert(data.message || "Realized savings cleared to ₹0.00 successfully!");
+        closeClearModal();
+        refreshAllData();
+      } catch (err) {
+        alert("Error clearing savings: " + err);
+      }
+    }
+
+    async function reopenAllWaste() {
+      if (!confirm("Are you sure you want to reset and re-open all waste findings? This re-enables all findings for live remediation.")) {
+        return;
+      }
+      try {
+        const res = await fetch('/api/savings/reopen-all-waste', { method: 'POST' });
+        const data = await res.json();
+        alert(data.message || "All waste findings re-opened successfully!");
+        closeClearModal();
+        refreshAllData();
+      } catch (err) {
+        alert("Error resetting waste: " + err);
+      }
+    }
+
+    function clearFindingsFilters() {
+      const provEl = document.getElementById('filter-provider');
+      const riskEl = document.getElementById('filter-risk');
+      if (provEl) provEl.value = '';
+      if (riskEl) riskEl.value = '';
+      fetchFindings();
+    }
+
+    function clearAllFilters() {
+      clearFindingsFilters();
+      if (typeof filterResources === 'function') filterResources('provider', '');
+      if (typeof filterFocusTable === 'function') filterFocusTable('');
+      closeClearModal();
+      alert("All filters cleared to default!");
+    }
+
+    async function factoryResetAndReseed() {
+      if (!confirm("Are you sure you want to perform a full factory reset? This will wipe the database and re-seed clean multi-cloud telemetry.")) {
+        return;
+      }
+      try {
+        await fetch('/api/demo/reset', { method: 'POST' });
+        await fetch('/api/demo/seed', { method: 'POST' });
+        alert("Factory reset complete! Clean multi-cloud environment re-seeded.");
+        closeClearModal();
+        refreshAllData();
+      } catch (err) {
+        alert("Error during factory reset: " + err);
+      }
+    }
+
+    async function syncFleetData() {
+      const btn = document.getElementById('btn-sync');
+      btn.innerHTML = `<i data-lucide="loader" class="w-3.5 h-3.5 animate-spin"></i><span>Syncing...</span>`;
+      lucide.createIcons();
+      try {
+        const res = await fetch('/api/demo/seed', { method: 'POST' });
+        await res.json();
+        alert("Enterprise fleet synced successfully across AWS, Azure, and Google Cloud!");
+        refreshAllData();
+      } catch (err) {
+        alert("Error syncing fleet: " + err);
+      } finally {
+        btn.innerHTML = `<i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i><span>Sync Enterprise Fleet</span>`;
+        lucide.createIcons();
+      }
+    }
+
+    async function triggerScanAll() {
+      const btn = document.getElementById('btn-scan');
+      btn.innerHTML = `<i data-lucide="loader" class="w-3.5 h-3.5 animate-spin"></i><span>Scanning...</span>`;
+      lucide.createIcons();
+      try {
+        const res = await fetch('/api/accounts/scan-all', { method: 'POST' });
+        const data = await res.json();
+        alert(`Full scan completed across ${data.scanned_accounts} cloud accounts!`);
+        refreshAllData();
+      } catch (err) {
+        alert("Error running scan: " + err);
+      } finally {
+        btn.innerHTML = `<i data-lucide="scan" class="w-3.5 h-3.5"></i><span>Run Fleet Scan</span>`;
+        lucide.createIcons();
+      }
+    }
+
+    async function fetchDashboardStats() {
+      try {
+        const res = await fetch('/api/savings/summary');
+        const data = await res.json();
+
+        document.getElementById('stat-potential-savings').textContent = `₹${data.total_potential_monthly_savings.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+        document.getElementById('stat-realized-savings').textContent = `₹${data.total_realized_savings.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+        document.getElementById('stat-open-findings').textContent = data.open_findings_count;
+
+        const low = data.by_risk_level.LOW || 0;
+        const med = data.by_risk_level.MEDIUM || 0;
+        const high = data.by_risk_level.HIGH || 0;
+        document.getElementById('risk-distribution-pills').innerHTML = `
+          <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">${low} Low</span>
+          <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300">${med} Med</span>
+          <span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300">${high} High</span>
+        `;
+
+        renderProviderPie(data.by_provider);
+      } catch (err) {
+        console.error("fetchDashboardStats error:", err);
+      }
+    }
+
+    function renderProviderPie(byProvider) {
+      const ctx = document.getElementById('chart-provider-pie');
+      if (!ctx) return;
+      const awsVal = (byProvider && byProvider.aws) || 76500;
+      const azVal = (byProvider && byProvider.azure) || 46750;
+      const gcpVal = (byProvider && byProvider.gcp) || 32725;
+
+      if (providerPieChart) providerPieChart.destroy();
+      providerPieChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['AWS (Amber)', 'Azure (Blue)', 'Google Cloud (Green)'],
+          datasets: [{
+            data: [awsVal, azVal, gcpVal],
+            backgroundColor: ['#F59E0B', '#0284C7', '#10B981'],
+            borderColor: '#111827',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { color: '#D1D5DB', font: { size: 11 } }
+            }
+          }
+        }
+      });
+    }
+
+    async function fetchSavingsHistory() {
+      try {
+        const res = await fetch('/api/savings/history?days=14');
+        const data = await res.json();
+        const ctx = document.getElementById('chart-savings-trend');
+        if (!ctx) return;
+
+        const labels = data.map(d => d.date);
+        const realized = data.map(d => d.realized);
+        const potential = data.map(d => d.potential);
+
+        if (savingsTrendChart) savingsTrendChart.destroy();
+        savingsTrendChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: 'Realized Savings (₹)',
+                data: realized,
+                borderColor: '#10B981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                fill: true,
+                tension: 0.3
+              },
+              {
+                label: 'Identified Waste (₹)',
+                data: potential,
+                borderColor: '#F59E0B',
+                borderDash: [5, 5],
+                fill: false,
+                tension: 0.3
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { grid: { color: '#1F2937' }, ticks: { color: '#9CA3AF', font: { size: 10 } } },
+              y: { grid: { color: '#1F2937' }, ticks: { color: '#9CA3AF', font: { size: 10 } } }
+            },
+            plugins: {
+              legend: { labels: { color: '#D1D5DB', font: { size: 11 } } }
+            }
+          }
+        });
+      } catch (err) {
+        console.error("fetchSavingsHistory error:", err);
+      }
+    }
+
+    // FOCUS Data Ingestion Table
+    async function fetchFocusData() {
+      try {
+        const res = await fetch('/api/focus/records');
+        cachedFocusRecords = await res.json();
+        renderFocusTable(cachedFocusRecords);
+      } catch (err) {
+        console.error("fetchFocusData error:", err);
+      }
+    }
+
+    function renderFocusTable(records) {
+      const tbody = document.getElementById('focus-table-body');
+      if (!tbody) return;
+      document.getElementById('focus-record-count').textContent = `Showing ${records.length} line items`;
+
+      if (records.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-8 text-center text-gray-500">No records found.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = records.map(r => {
+        let provBadge = '';
+        if (r.ProviderName === 'AWS') {
+          provBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">AWS</span>`;
+        } else if (r.ProviderName === 'Azure') {
+          provBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40">Azure</span>`;
+        } else {
+          provBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">Google Cloud</span>`;
+        }
+
+        const billedInr = (r.BilledCost * 85.0).toLocaleString('en-IN', {minimumFractionDigits: 2});
+        const statusBadge = r.is_synthetic_leak ? 
+          `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">Leak: ${r.ground_truth_leak_type}</span>` :
+          `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Active Production</span>`;
+
+        let telemStr = '';
+        if (r.Telemetry) {
+          if (r.Telemetry.avg_cpu_pct !== undefined) telemStr += `Avg CPU: ${r.Telemetry.avg_cpu_pct}% | `;
+          if (r.Telemetry.iops !== undefined) telemStr += `IOPS: ${r.Telemetry.iops} | `;
+          if (r.Telemetry.network_egress_gb !== undefined) telemStr += `Egress: ${r.Telemetry.network_egress_gb} GB`;
+        }
+
+        return `
+          <tr class="hover:bg-gray-800/40">
+            <td class="px-4 py-3">
+              <div class="flex items-center space-x-1.5">${provBadge}<span class="text-gray-400 font-mono text-[11px]">${r.RegionId || 'global'}</span></div>
+            </td>
+            <td class="px-4 py-3">
+              <div class="font-mono text-gray-200 font-medium">${r.ResourceId}</div>
+              <div class="text-[11px] text-gray-400">${r.ResourceType}</div>
+            </td>
+            <td class="px-4 py-3">
+              <span class="text-gray-300">${r.ChargeCategory}</span>
+              <span class="text-[10px] text-gray-500 block">${r.ChargeSubcategory || ''}</span>
+            </td>
+            <td class="px-4 py-3 text-[11px] text-cyan-300 font-mono">${telemStr || 'Nominal'}</td>
+            <td class="px-4 py-3 text-[11px] text-gray-400 font-mono">Env: ${r.Tags && r.Tags.Environment || 'prod'}</td>
+            <td class="px-4 py-3 text-right font-bold text-white">₹${billedInr}</td>
+            <td class="px-4 py-3 text-center">${statusBadge}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function filterFocusTable(prov) {
+      if (!prov) {
+        renderFocusTable(cachedFocusRecords);
+      } else {
+        const filtered = cachedFocusRecords.filter(r => r.ProviderName.toLowerCase().includes(prov.toLowerCase()));
+        renderFocusTable(filtered);
+      }
+    }
+
+    async function injectSyntheticLeaks() {
+      const btn = document.getElementById('btn-inject-focus');
+      btn.innerHTML = `<i data-lucide="loader" class="w-3.5 h-3.5 animate-spin"></i><span>Injecting...</span>`;
+      lucide.createIcons();
+      try {
+        const res = await fetch('/api/focus/inject-leaks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ count: 3 })
+        });
+        const data = await res.json();
+        alert(`Successfully injected ${data.leaks_added} telemetry test anomalies!`);
+        fetchFocusData();
+      } catch (err) {
+        alert("Error injecting telemetry: " + err);
+      } finally {
+        btn.innerHTML = `<i data-lucide="zap" class="w-4 h-4"></i><span>Inject Telemetry Leaks</span>`;
+        lucide.createIcons();
+      }
+    }
+
+    // Running Host System CPU Traces & Live Kernel Telemetry
+    async function loadVmTraceChart(manual = false) {
+      const btn = document.getElementById('btn-refresh-cpu');
+      if (manual && btn) {
+        btn.innerHTML = `<i data-lucide="loader" class="w-3.5 h-3.5 animate-spin"></i><span>Sampling...</span>`;
+        lucide.createIcons();
+      }
+
+      try {
+        const res = await fetch('/api/focus/system-traces?hours=24');
+        const data = await res.json();
+        const traces = Array.isArray(data) ? data : (data.traces || []);
+        const hw = data.system_info || {};
+
+        // Update Host System Hardware Pill
+        const sysInfoPill = document.getElementById('trace-system-info-pill');
+        if (sysInfoPill) {
+          const osName = hw.os_name || 'Host OS';
+          const cores = hw.logical_cores || 'Multi-Core';
+          const ram = hw.total_ram_gb ? `${hw.total_ram_gb} GB` : 'RAM';
+          const memLoad = hw.memory_load_pct ? ` (${hw.memory_load_pct}% load)` : '';
+          sysInfoPill.innerHTML = `<i data-lucide="server" class="w-3 h-3 inline mr-1 text-cyan-400"></i>${osName} &bull; ${cores} Cores &bull; ${ram}${memLoad}`;
+        }
+
+        // Update Real-Time Host Metric Cards
+        const liveCpuVal = data.live_cpu !== undefined ? data.live_cpu : (traces.length > 0 ? traces[traces.length - 1].avg_cpu : 0);
+        const meanCpuVal = data.mean_cpu !== undefined ? data.mean_cpu : 0;
+        const p95CpuVal = data.p95_cpu !== undefined ? data.p95_cpu : 0;
+
+        const liveEl = document.getElementById('trace-live-cpu');
+        if (liveEl) liveEl.textContent = `${Number(liveCpuVal).toFixed(1)}%`;
+
+        const meanEl = document.getElementById('trace-mean-cpu');
+        if (meanEl) meanEl.textContent = `${Number(meanCpuVal).toFixed(1)}%`;
+
+        const p95El = document.getElementById('trace-p95-cpu');
+        if (p95El) p95El.textContent = `${Number(p95CpuVal).toFixed(1)}%`;
+
+        const classBadge = document.getElementById('trace-class-badge');
+        if (classBadge) {
+          if (data.is_classified_idle) {
+            classBadge.className = "px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/30";
+            classBadge.textContent = "IDLE WORKLOAD (< 10%)";
+          } else {
+            classBadge.className = "px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+            classBadge.textContent = "ACTIVE WORKLOAD (> 10%)";
+          }
+        }
+
+        const lastUp = document.getElementById('trace-last-updated');
+        if (lastUp) {
+          const nowStr = new Date().toLocaleTimeString();
+          lastUp.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span><span>Live Sampled at ${nowStr}</span>`;
+        }
+
+        const ctx = document.getElementById('chart-cpu-traces');
+        if (!ctx) return;
+
+        const labels = traces.map(t => t.time_label || (t.timestamp ? t.timestamp.substring(11, 16) : ''));
+        const avgCpu = traces.map(t => t.avg_cpu);
+        const p95Cpu = traces.map(t => t.p95_cpu);
+        const threshold = traces.map(() => 10.0);
+
+        if (cpuTraceChart) cpuTraceChart.destroy();
+        cpuTraceChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: 'Avg Host System CPU (%)',
+                data: avgCpu,
+                borderColor: '#06B6D4',
+                backgroundColor: 'rgba(6, 182, 212, 0.12)',
+                fill: true,
+                tension: 0.25,
+                borderWidth: 2,
+                pointRadius: 0,
+                pointHoverRadius: 4
+              },
+              {
+                label: 'P95 Peak CPU (%)',
+                data: p95Cpu,
+                borderColor: '#F59E0B',
+                borderDash: [3, 3],
+                fill: false,
+                tension: 0.25,
+                borderWidth: 1.5,
+                pointRadius: 0,
+                pointHoverRadius: 4
+              },
+              {
+                label: 'FinOps Idle Threshold (10%)',
+                data: threshold,
+                borderColor: '#EF4444',
+                borderDash: [5, 5],
+                pointRadius: 0,
+                fill: false,
+                borderWidth: 1.5
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+              mode: 'index',
+              intersect: false
+            },
+            scales: {
+              x: {
+                grid: { color: '#1F2937' },
+                ticks: { color: '#9CA3AF', maxTicksLimit: 14 }
+              },
+              y: {
+                min: 0,
+                max: 100,
+                grid: { color: '#1F2937' },
+                ticks: {
+                  color: '#9CA3AF',
+                  callback: val => val + '%'
+                }
+              }
+            },
+            plugins: {
+              legend: {
+                labels: { color: '#D1D5DB', font: { size: 11 } }
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    return ` ${context.dataset.label}: ${Number(context.raw).toFixed(1)}%`;
+                  }
+                }
+              }
+            }
+          }
+        });
+      } catch (err) {
+        console.error("loadVmTraceChart error:", err);
+      } finally {
+        if (manual && btn) {
+          btn.innerHTML = `<i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i><span>Sample Now</span>`;
+          lucide.createIcons();
+        }
+      }
+    }
+
+    function startLiveSystemCpuMonitor() {
+      stopLiveSystemCpuMonitor();
+      liveCpuMonitorTimer = setInterval(async () => {
+        try {
+          const res = await fetch('/api/focus/live-cpu');
+          if (!res.ok) return;
+          const data = await res.json();
+          const cpuVal = data.live_cpu;
+
+          const liveEl = document.getElementById('trace-live-cpu');
+          if (liveEl && cpuVal !== undefined) {
+            liveEl.textContent = `${Number(cpuVal).toFixed(1)}%`;
+          }
+
+          if (cpuTraceChart && cpuTraceChart.data && cpuTraceChart.data.datasets.length > 0) {
+            const avgDataset = cpuTraceChart.data.datasets[0];
+            if (avgDataset && avgDataset.data.length > 0) {
+              avgDataset.data[avgDataset.data.length - 1] = cpuVal;
+              const lastUp = document.getElementById('trace-last-updated');
+              if (lastUp) {
+                lastUp.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span><span>Live Sampled at ${data.timestamp || new Date().toLocaleTimeString()}</span>`;
+              }
+              cpuTraceChart.update('none');
+            }
+          }
+        } catch (e) {
+          // Silent polling fail
+        }
+      }, 3000);
+    }
+
+    function stopLiveSystemCpuMonitor() {
+      if (liveCpuMonitorTimer) {
+        clearInterval(liveCpuMonitorTimer);
+        liveCpuMonitorTimer = null;
+      }
+    }
+
+    // Resource Telemetry & List
+    async function fetchResourceTelemetry() {
+      try {
+        const res = await fetch('/api/resources/telemetry');
+        if (!res.ok) {
+          throw new Error(`Failed to fetch resource telemetry: HTTP ${res.status}`);
+        }
+        const data = await res.json();
+
+        const vcpus = data.total_vcpus ?? 0;
+        const ram = data.total_ram_gb ?? data.total_memory_gb ?? 0;
+        const avgCpu = data.fleet_avg_cpu ?? data.avg_cpu_pct ?? 0;
+        const avgMem = data.fleet_avg_memory ?? data.avg_memory_pct ?? 0;
+
+        const elVcpus = document.getElementById('res-stat-vcpus');
+        if (elVcpus) elVcpus.textContent = `${vcpus} vCPUs`;
+        const elRam = document.getElementById('res-stat-ram');
+        if (elRam) elRam.textContent = `${Number(ram).toFixed(1)} GB Total RAM`;
+        const elAvgCpu = document.getElementById('res-stat-avg-cpu');
+        if (elAvgCpu) elAvgCpu.textContent = `${Number(avgCpu).toFixed(1)}%`;
+        const elAvgMem = document.getElementById('res-stat-avg-mem');
+        if (elAvgMem) elAvgMem.textContent = `${Number(avgMem).toFixed(1)}%`;
+
+        const sUsed = data.total_storage_used_gb ?? 0;
+        const sProv = data.total_storage_provisioned_gb ?? 0;
+        const sPct = data.storage_utilization_pct ?? (sProv > 0 ? (sUsed / sProv * 100) : 0);
+
+        const elStorageUsed = document.getElementById('res-stat-storage-used');
+        if (elStorageUsed) elStorageUsed.textContent = `${Number(sUsed).toFixed(1)} GB Used`;
+        const elStorageProv = document.getElementById('res-stat-storage-prov');
+        if (elStorageProv) elStorageProv.textContent = `of ${Number(sProv).toFixed(1)} GB Provisioned`;
+        const elStoragePct = document.getElementById('res-stat-storage-pct');
+        if (elStoragePct) elStoragePct.textContent = `${Number(sPct).toFixed(1)}%`;
+        const elStorageBar = document.getElementById('res-stat-storage-bar');
+        if (elStorageBar) elStorageBar.style.width = `${Math.min(100, Math.max(0, sPct))}%`;
+
+        const netOut = data.total_network_egress_gb ?? data.total_network_out_gb ?? 0;
+        const netIn = data.total_network_ingress_gb ?? data.total_network_in_gb ?? 0;
+        const netTotal = data.total_data_transfer_gb ?? (netOut + netIn);
+
+        const elNetOut = document.getElementById('res-stat-network-out');
+        if (elNetOut) elNetOut.textContent = `${Number(netOut).toFixed(1)} GB Out`;
+        const elNetIn = document.getElementById('res-stat-network-in');
+        if (elNetIn) elNetIn.textContent = `${Number(netIn).toFixed(1)} GB Inbound Transfer`;
+        const elNetTotal = document.getElementById('res-stat-data-total');
+        if (elNetTotal) elNetTotal.textContent = `${Number(netTotal).toFixed(1)} GB Total`;
+
+        const totalRes = data.total_resources ?? 0;
+        const totalCost = (data.total_monthly_cost ?? 0).toLocaleString('en-IN', {minimumFractionDigits: 2});
+        const elTotalCount = document.getElementById('res-stat-total-count');
+        if (elTotalCount) elTotalCount.textContent = `${totalRes} Assets`;
+        const elTotalCost = document.getElementById('res-stat-total-cost');
+        if (elTotalCost) elTotalCost.textContent = `₹${totalCost} / month total`;
+
+        const awsCount = (data.by_provider && data.by_provider.aws && (data.by_provider.aws.count ?? data.by_provider.aws)) || 0;
+        const azCount = (data.by_provider && data.by_provider.azure && (data.by_provider.azure.count ?? data.by_provider.azure)) || 0;
+        const gcpCount = (data.by_provider && data.by_provider.gcp && (data.by_provider.gcp.count ?? data.by_provider.gcp)) || 0;
+
+        const elPills = document.getElementById('res-provider-pills');
+        if (elPills) {
+          elPills.innerHTML = `
+            <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">AWS: ${awsCount}</span>
+            <span class="px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30 font-bold">Azure: ${azCount}</span>
+            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">GCP: ${gcpCount}</span>
+          `;
+        }
+      } catch (err) {
+        console.error("fetchResourceTelemetry error:", err);
+      }
+    }
+
+    async function fetchResourcesList() {
+      try {
+        const res = await fetch('/api/resources/');
+        cachedResources = await res.json();
+        renderResourcesTable(cachedResources);
+      } catch (err) {
+        console.error("fetchResourcesList error:", err);
+      }
+    }
+
+    function renderResourcesTable(resources) {
+      const tbody = document.getElementById('resources-table-body');
+      if (!tbody) return;
+
+      if (resources.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-8 text-center text-gray-500">No resources matched current filters.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = resources.map(r => {
+        let provBadge = '';
+        if (r.provider === 'aws') {
+          provBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">AWS</span>`;
+        } else if (r.provider === 'azure') {
+          provBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40">Azure</span>`;
+        } else {
+          provBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">GCP</span>`;
+        }
+
+        const costInr = (r.monthly_cost || 0).toLocaleString('en-IN', {minimumFractionDigits: 2});
+
+        return `
+          <tr class="hover:bg-gray-800/40">
+            <td class="px-5 py-3">
+              <div class="font-medium text-white">${r.name || r.resource_id}</div>
+              <div class="text-[10px] text-gray-500 font-mono">${r.resource_id} &bull; ${r.region}</div>
+            </td>
+            <td class="px-5 py-3">
+              <div class="flex items-center space-x-1.5">${provBadge}<span class="text-xs text-gray-300">${r.resource_type}</span></div>
+              <div class="text-[10px] text-gray-400 mt-0.5">Env: ${r.environment_tag || 'prod'}</div>
+            </td>
+            <td class="px-5 py-3">
+              <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-gray-800 text-gray-300 border border-gray-700">${r.state || 'running'}</span>
+            </td>
+            <td class="px-5 py-3 text-xs text-gray-300">
+              ${r.average_cpu !== null && r.average_cpu !== undefined ? `Avg CPU: <b class="${r.average_cpu < 10 ? 'text-amber-400' : 'text-emerald-400'}">${r.average_cpu.toFixed(1)}%</b>` : '<span class="text-gray-500">N/A</span>'}
+            </td>
+            <td class="px-5 py-3 text-xs text-gray-300">
+              ${r.storage_provisioned_gb ? `${r.storage_used_gb || 0} / ${r.storage_provisioned_gb} GB` : '<span class="text-gray-500">N/A</span>'}
+            </td>
+            <td class="px-5 py-3 text-xs text-gray-300">
+              ${r.network_egress_gb ? `${r.network_egress_gb.toFixed(1)} GB out` : '<span class="text-gray-500">0.0 GB</span>'}
+            </td>
+            <td class="px-5 py-3 text-right font-bold text-white">₹${costInr}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    let activeFilter = { provider: '', type: '', search: '' };
+    function filterResources(key, val) {
+      activeFilter[key] = val;
+      applyResourceFilters();
+    }
+    function handleResourceSearch(q) {
+      activeFilter.search = q.toLowerCase();
+      applyResourceFilters();
+    }
+    function applyResourceFilters() {
+      let filtered = cachedResources;
+      if (activeFilter.provider) {
+        filtered = filtered.filter(r => r.provider.toLowerCase() === activeFilter.provider.toLowerCase());
+      }
+      if (activeFilter.type) {
+        filtered = filtered.filter(r => r.resource_type.toLowerCase() === activeFilter.type.toLowerCase());
+      }
+      if (activeFilter.search) {
+        filtered = filtered.filter(r => 
+          (r.name && r.name.toLowerCase().includes(activeFilter.search)) ||
+          r.resource_id.toLowerCase().includes(activeFilter.search) ||
+          r.region.toLowerCase().includes(activeFilter.search)
+        );
+      }
+      renderResourcesTable(filtered);
+    }
+
+    // Waste Findings
+    function goToProviderWaste(provider) {
+      switchTab('findings');
+      const provEl = document.getElementById('filter-provider');
+      if (provEl) {
+        provEl.value = provider || '';
+        fetchFindings();
+      }
+    }
+
+    async function fetchFindings() {
+      try {
+        const provEl = document.getElementById('filter-provider');
+        const riskEl = document.getElementById('filter-risk');
+        const prov = provEl ? provEl.value : '';
+        const risk = riskEl ? riskEl.value : '';
+        let url = '/api/findings/?';
+        if (prov) url += `provider=${prov}&`;
+        if (risk) url += `risk_level=${risk}&`;
+
+        const res = await fetch(url);
+        const findings = await res.json();
+        window.cachedFindings = findings;
+        populateSimulatorFleetDropdown(findings);
+
+        const tbody = document.getElementById('findings-table-body');
+        const countEl = document.getElementById('findings-count-text');
+        if (countEl) countEl.textContent = `Showing ${findings.length} findings`;
+
+        if (!tbody) return;
+
+        if (findings.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-gray-500">No waste findings matching criteria.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = findings.map(f => {
+          let provBadge = '';
+          if (f.provider === 'aws') {
+            provBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">AWS</span>`;
+          } else if (f.provider === 'azure') {
+            provBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40">Azure</span>`;
+          } else {
+            provBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">GCP</span>`;
+          }
+
+          let riskBadge = '';
+          const score = typeof f.risk_score === 'number' ? f.risk_score.toFixed(1) : '30.0';
+          if (f.risk_level === 'LOW') {
+            riskBadge = `<span class="px-2 py-0.5 rounded text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">LOW (${score})</span>`;
+          } else if (f.risk_level === 'MEDIUM') {
+            riskBadge = `<span class="px-2 py-0.5 rounded text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">MED (${score})</span>`;
+          } else {
+            riskBadge = `<span class="px-2 py-0.5 rounded text-xs font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">HIGH (${score})</span>`;
+          }
+
+          const rawSaving = f.estimated_monthly_saving !== undefined ? f.estimated_monthly_saving : (f.estimated_monthly_savings || 0);
+          const savingsInr = (rawSaving * 85.0).toLocaleString('en-IN', {minimumFractionDigits: 2});
+
+          let actionCol = '';
+          if (f.status === 'remediated') {
+            actionCol = `<span class="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 inline-flex items-center"><i data-lucide="check" class="w-3.5 h-3.5 mr-1"></i>Remediated</span>`;
+          } else if (f.risk_level === 'HIGH' || f.risk_level === 'MEDIUM') {
+            actionCol = `
+              <button onclick="executeFinding(${f.id})" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow transition flex items-center space-x-1 ml-auto">
+                <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+                <span>Remediate (Safe)</span>
+              </button>
+            `;
+          } else {
+            actionCol = `
+              <button onclick="executeFinding(${f.id})" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow transition flex items-center space-x-1 ml-auto">
+                <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+                <span>Auto-Remediate</span>
+              </button>
+            `;
+          }
+
+          return `
+            <tr class="hover:bg-gray-800/40">
+              <td class="px-6 py-4">
+                <div class="font-medium text-white">${f.resource_id}</div>
+                <div class="flex items-center space-x-1.5 mt-0.5">${provBadge}<span class="text-xs text-gray-400">${f.resource_type}</span></div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="font-semibold text-gray-200 text-xs">${f.rule_id}</div>
+                <div class="text-xs text-gray-400 mt-0.5">${f.reason}</div>
+              </td>
+              <td class="px-6 py-4">${riskBadge}</td>
+              <td class="px-6 py-4 font-bold text-emerald-400">₹${savingsInr} / mo</td>
+              <td class="px-6 py-4 text-right">
+                ${actionCol}
+              </td>
+            </tr>
+          `;
+        }).join('');
+        lucide.createIcons();
+      } catch (err) {
+        console.error("fetchFindings error:", err);
+      }
+    }
+
+    async function executeFinding(findingId) {
+      try {
+        const res = await fetch('/api/remediation/execute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ finding_id: findingId, dry_run: false })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.detail || "Remediation failed to execute");
+        }
+        alert(`Remediation executed successfully!\n\nAction ID: #ACT-00${data.id}\nResource: ${data.resource_id}\nAction: ${data.action_type}\nPre-Action Snapshot: ${data.snapshot_id || 'Verified Reversible State'}\nLifecycle State: ${(data.status || 'VERIFIED').toUpperCase()}`);
+        refreshAllData();
+      } catch (err) {
+        alert("Execution error: " + (err.message || err));
+      }
+    }
+
+    // Approvals
+    async function fetchApprovals() {
+      try {
+        const res = await fetch('/api/approvals?status=pending');
+        const approvals = await res.json();
+        const container = document.getElementById('approvals-container');
+        
+        // Update approval badges across navbar, dashboard, and header
+        const countBadge = document.getElementById('badge-approval-count');
+        if (countBadge) countBadge.textContent = approvals.length;
+        const statApprovals = document.getElementById('stat-pending-approvals');
+        if (statApprovals) statApprovals.textContent = approvals.length;
+        const headingBadge = document.getElementById('approvals-badge-text');
+        if (headingBadge) headingBadge.textContent = `${approvals.length} Awaiting Review`;
+
+        if (!container) return;
+
+        if (!approvals || approvals.length === 0) {
+          container.innerHTML = `
+            <div class="p-8 text-center glass-card rounded-2xl border border-gray-800">
+              <i data-lucide="check-circle" class="w-10 h-10 text-emerald-400 mx-auto mb-2 opacity-80"></i>
+              <p class="text-sm font-semibold text-gray-300">Approval Queue Cleared</p>
+              <p class="text-xs text-gray-500 mt-1">All high and medium risk findings have been reviewed and authorized.</p>
+            </div>
+          `;
+          lucide.createIcons();
+          return;
+        }
+
+        container.innerHTML = approvals.map(a => {
+          const f = a.finding || {};
+          const prov = (f.provider || 'aws').toLowerCase();
+          
+          let provBadge = '';
+          if (prov === 'aws') {
+            provBadge = `<span class="px-2.5 py-1 rounded-md text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/40 tracking-wider">AWS</span>`;
+          } else if (prov === 'azure') {
+            provBadge = `<span class="px-2.5 py-1 rounded-md text-[10px] font-black bg-sky-500/20 text-sky-300 border border-sky-500/40 tracking-wider">AZURE</span>`;
+          } else {
+            provBadge = `<span class="px-2.5 py-1 rounded-md text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 tracking-wider">GCP</span>`;
+          }
+
+          const score = typeof f.risk_score === 'number' ? f.risk_score.toFixed(1) : '55.0';
+          const isHigh = f.risk_level === 'HIGH' || parseFloat(score) >= 70;
+          const riskBadge = isHigh ?
+            `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-500/20 text-rose-400 border border-rose-500/40 flex items-center"><span class="w-1.5 h-1.5 rounded-full bg-rose-400 mr-1.5 animate-ping"></span>HIGH RISK (${score}/100)</span>` :
+            `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center"><span class="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1.5"></span>MEDIUM RISK (${score}/100)</span>`;
+
+          const rawSaving = f.estimated_monthly_saving !== undefined ? f.estimated_monthly_saving : (f.estimated_monthly_savings || 0);
+          const savings = (rawSaving * 85.0).toLocaleString('en-IN', {minimumFractionDigits: 2});
+          const actionName = f.recommended_action || 'remediate_resource';
+          const resId = f.resource_id || `Finding #${a.finding_id}`;
+          const reason = f.reason || 'Detected cloud waste pattern requiring human review.';
+          const ruleId = f.rule_id || 'GOVERNANCE_CHECK';
+
+          return `
+            <div class="glass-card rounded-2xl p-6 border ${isHigh ? 'border-rose-500/30' : 'border-amber-500/30'} hover:border-indigo-500/50 transition shadow-lg">
+              <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+                <div class="space-y-2.5">
+                  <div class="flex flex-wrap items-center gap-2">
+                    ${provBadge}
+                    <span class="text-xs font-mono font-bold text-gray-200">${resId}</span>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-gray-800 text-gray-400 border border-gray-700">${ruleId}</span>
+                    ${riskBadge}
+                  </div>
+                  <p class="text-xs text-gray-300 leading-relaxed">${reason}</p>
+                  <div class="flex flex-wrap items-center gap-5 text-xs pt-1">
+                    <span class="text-gray-400">Monthly Leak: <b class="text-emerald-400 font-bold text-sm">₹${savings}</b></span>
+                    <span class="text-gray-400">Action: <code class="px-2 py-0.5 rounded bg-gray-800 text-cyan-300 font-mono text-[11px]">${actionName}</code></span>
+                    <span class="text-cyan-400 text-[11px] flex items-center">
+                      <i data-lucide="shield-check" class="w-3.5 h-3.5 mr-1 text-cyan-400"></i>
+                      Mandatory Pre-Action Snapshot Backup
+                    </span>
+                  </div>
+                </div>
+                <div class="flex items-center space-x-2.5 self-end lg:self-center shrink-0">
+                  <button onclick="decideApproval(${a.id}, 'approve')" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-900/30 flex items-center space-x-1.5 transition">
+                    <i data-lucide="check-circle" class="w-4 h-4"></i>
+                    <span>Approve & Execute</span>
+                  </button>
+                  <button onclick="decideApproval(${a.id}, 'reject')" class="px-3.5 py-2.5 rounded-xl bg-gray-800 hover:bg-rose-900/50 text-gray-300 hover:text-rose-200 border border-gray-700 font-bold text-xs flex items-center space-x-1.5 transition">
+                    <i data-lucide="x-circle" class="w-4 h-4"></i>
+                    <span>Reject</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+        lucide.createIcons();
+      } catch (err) {
+        console.error("fetchApprovals error:", err);
+      }
+    }
+
+    async function decideApproval(id, decision) {
+      try {
+        const res = await fetch(`/api/approvals/${id}/decision`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: decision,
+            decision: decision,
+            decision_notes: `Authorized via Governance Portal by Lead Operator (${decision.toUpperCase()})`
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.detail || "Approval decision failed");
+        }
+        if (decision === 'approve') {
+          alert(`Approval granted!\n\nSafety Snapshot Created: ${data.snapshot_id || 'Verified Reversible State'}\nRemediation Status: ${data.remediation_status || 'VERIFIED'}\nAction ID: #ACT-00${data.remediation_id}`);
+        } else {
+          alert(`Approval request dismissed. Finding status updated.`);
+        }
+        refreshAllData();
+      } catch (err) {
+        alert("Error deciding approval: " + (err.message || err));
+      }
+    }
+
+    // Executed Remediations & Pre-Action Snapshot Vault
+    async function fetchRemediations() {
+      try {
+        const res = await fetch('/api/remediation');
+        const remediations = await res.json();
+        const tbody = document.getElementById('remediations-table-body');
+        if (!tbody) return;
+
+        if (!remediations || remediations.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">No executed remediations in vault yet.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = remediations.map(r => {
+          let prov = 'aws';
+          const rid = (r.resource_id || '').toLowerCase();
+          if (rid.startsWith('i-') || rid.startsWith('vol-') || rid.startsWith('eipalloc-') || rid.includes('aws')) {
+            prov = 'aws';
+          } else if (rid.startsWith('vm-') || rid.startsWith('disk-') || rid.startsWith('pip-') || rid.includes('azure')) {
+            prov = 'azure';
+          } else {
+            prov = 'gcp';
+          }
+
+          let provBadge = '';
+          if (prov === 'aws') {
+            provBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">AWS</span>`;
+          } else if (prov === 'azure') {
+            provBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40">Azure</span>`;
+          } else {
+            provBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">GCP</span>`;
+          }
+
+          let statusBadge = '';
+          if (r.status === 'verified') {
+            statusBadge = `<span class="px-2.5 py-1 rounded text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 inline-flex items-center"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>VERIFIED</span>`;
+          } else if (r.status === 'rolled_back') {
+            statusBadge = `<span class="px-2.5 py-1 rounded text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/40 inline-flex items-center"><span class="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1.5"></span>ROLLED BACK</span>`;
+          } else {
+            statusBadge = `<span class="px-2.5 py-1 rounded text-xs font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/40 inline-flex items-center"><span class="w-1.5 h-1.5 rounded-full bg-indigo-400 mr-1.5"></span>${r.status.toUpperCase()}</span>`;
+          }
+
+          const snapHtml = r.snapshot_id ?
+            `<div class="flex items-center space-x-1.5">
+               <i data-lucide="shield-check" class="w-3.5 h-3.5 text-cyan-400"></i>
+               <span class="font-mono text-cyan-300 text-xs font-medium">${r.snapshot_id}</span>
+             </div>` :
+            `<span class="text-gray-500 text-xs font-mono">None (Safe Reversible API)</span>`;
+
+          let actionBtn = '';
+          if (r.status === 'verified' || r.status === 'executed') {
+            actionBtn = `
+              <button onclick="rollbackAction(${r.id})" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white flex items-center space-x-1.5 ml-auto shadow-md transition">
+                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                <span>1-Click Rollback</span>
+              </button>
+            `;
+          } else if (r.status === 'rolled_back') {
+            actionBtn = `
+              <span class="px-2.5 py-1 rounded text-xs font-medium bg-gray-800/80 text-gray-400 border border-gray-700 ml-auto block w-fit">
+                Restored Baseline
+              </span>
+            `;
+          } else {
+            actionBtn = `<span class="text-xs text-gray-500 ml-auto block w-fit">—</span>`;
+          }
+
+          const dt = r.executed_at || r.created_at || 'Recent';
+          const dtFormatted = typeof dt === 'string' && dt.length >= 19 ? dt.substring(0, 19).replace('T', ' ') : dt;
+
+          return `
+            <tr class="hover:bg-gray-800/40 text-xs">
+              <td class="px-6 py-4">
+                <div class="font-bold text-white font-mono">#ACT-00${r.id}</div>
+                <div class="text-[10px] text-gray-500 font-mono mt-0.5">${dtFormatted}</div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="font-mono text-gray-200 font-medium">${r.resource_id}</div>
+                <div class="flex items-center space-x-1.5 mt-1">${provBadge}</div>
+              </td>
+              <td class="px-6 py-4">
+                <code class="px-2 py-0.5 rounded bg-gray-800 text-indigo-300 border border-gray-700 font-mono text-xs">${r.action_type}</code>
+                <div class="text-[10px] text-gray-500 mt-1">Actor: <span class="text-gray-400">${r.triggered_by || 'auto_pilot'}</span></div>
+              </td>
+              <td class="px-6 py-4">${snapHtml}</td>
+              <td class="px-6 py-4">${statusBadge}</td>
+              <td class="px-6 py-4 text-right">${actionBtn}</td>
+            </tr>
+          `;
+        }).join('');
+        lucide.createIcons();
+      } catch (err) {
+        console.error("fetchRemediations error:", err);
+      }
+    }
+
+    async function rollbackAction(remediationId) {
+      if (!confirm(`Are you sure you want to rollback Action #ACT-00${remediationId}?\n\nThis will trigger the rollback engine, restore the pre-action snapshot, reactivate the cloud resource, and re-open the finding.`)) {
+        return;
+      }
+      try {
+        const res = await fetch('/api/remediation/rollback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            remediation_id: remediationId,
+            reason: "Operator initiated 1-Click Rollback via Governance Portal"
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.detail || "Rollback operation failed");
+        }
+        alert(`Rollback completed successfully!\n\nAction ID: #ACT-00${remediationId}\nResource restored from snapshot and finding re-opened.`);
+        refreshAllData();
+      } catch (err) {
+        alert("Error executing rollback: " + (err.message || err));
+      }
+    }
+
+    // Audit Logs
+    async function fetchAuditLogs() {
+      try {
+        const res = await fetch('/api/audit/?limit=25');
+        const logs = await res.json();
+        const tbody = document.getElementById('audit-table-body');
+        if (!tbody) return;
+
+        if (logs.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-gray-500">No audit events logged.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = logs.map(l => {
+          let provBadge = '';
+          if (l.provider === 'aws') {
+            provBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">AWS</span>`;
+          } else if (l.provider === 'azure') {
+            provBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40">Azure</span>`;
+          } else if (l.provider === 'gcp') {
+            provBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">GCP</span>`;
+          } else {
+            provBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-gray-800 text-gray-300">SYSTEM</span>`;
+          }
+
+          return `
+            <tr class="hover:bg-gray-800/40 text-xs">
+              <td class="px-6 py-3.5 text-gray-400 font-mono">${l.timestamp ? l.timestamp.substring(0, 19).replace('T', ' ') : 'Just now'}</td>
+              <td class="px-6 py-3.5 font-semibold text-white">${l.event_type}</td>
+              <td class="px-6 py-3.5 text-indigo-400">${l.actor || 'system'}</td>
+              <td class="px-6 py-3.5">${provBadge} <span class="font-mono text-gray-300 ml-1">${l.resource_id || ''}</span></td>
+              <td class="px-6 py-3.5 text-gray-400 font-mono text-[11px]">${JSON.stringify(l.event_metadata || {})}</td>
+            </tr>
+          `;
+        }).join('');
+      } catch (err) {
+        console.error("fetchAuditLogs error:", err);
+      }
+    }
+
+    // Risk Simulator Sandbox Evaluation (Clean & Discrete - No Moving Slider Bar)
+    function setSimCpu(val) {
+      const input = document.getElementById('sim-cpu');
+      if (input) input.value = val;
+      runSandboxEvaluation();
+    }
+
+    function populateSimulatorFleetDropdown(findings) {
+      const select = document.getElementById('sim-fleet-finding');
+      if (!select || !findings || !findings.length) return;
+      if (select.options.length > 1) return; // already populated
+
+      findings.slice(0, 40).forEach(f => {
+        const opt = document.createElement('option');
+        opt.value = f.id;
+        const prov = (f.provider || 'cloud').toUpperCase();
+        const rId = f.resource_id || 'resource';
+        const rule = f.rule_id || 'idle';
+        const score = typeof f.risk_score === 'number' ? f.risk_score.toFixed(0) : '?';
+        opt.textContent = `[${prov}] ${rId} (${rule} • Risk Score: ${score}/100)`;
+        select.appendChild(opt);
+      });
+    }
+
+    function loadFleetFinding(findingId) {
+      if (!findingId) return;
+      const f = (window.cachedFindings || []).find(item => item.id == findingId);
+      if (!f) return;
+
+      const envEl = document.getElementById('sim-env');
+      const topoEl = document.getElementById('sim-topo');
+      const actionEl = document.getElementById('sim-action');
+      const cpuEl = document.getElementById('sim-cpu');
+
+      // Environment Tag
+      if (envEl) {
+        const env = (f.resource && f.resource.environment_tag ? f.resource.environment_tag.toLowerCase() : (f.environment || 'dev'));
+        if (env.includes('prod')) envEl.value = 'production';
+        else if (env.includes('stag')) envEl.value = 'staging';
+        else if (env.includes('dev') || env.includes('test')) envEl.value = 'dev';
+        else envEl.value = 'unknown';
+      }
+
+      // Topology
+      if (topoEl) {
+        const details = (f.details || '').toLowerCase();
+        const resId = (f.resource_id || '').toLowerCase();
+        if (details.includes('load balancer') || details.includes('alb') || resId.includes('lb')) {
+          topoEl.value = 'lb';
+        } else if (details.includes('mount') || details.includes('attached') || resId.includes('vol') || resId.includes('disk')) {
+          topoEl.value = 'mount';
+        } else {
+          topoEl.value = 'none';
+        }
+      }
+
+      // Proposed Action
+      if (actionEl) {
+        const act = (f.suggested_action || '').toLowerCase();
+        if (act.includes('delete') || act.includes('volume') || act.includes('disk')) {
+          actionEl.value = 'delete_volume';
+        } else if (act.includes('stop') || act.includes('instance') || act.includes('vm')) {
+          actionEl.value = 'stop_instance';
+        } else if (act.includes('ip') || act.includes('release')) {
+          actionEl.value = 'release_ip';
+        } else if (act.includes('schedule')) {
+          actionEl.value = 'schedule_stop';
+        } else {
+          actionEl.value = 'stop_instance';
+        }
+      }
+
+      // CPU Utilization
+      if (cpuEl) {
+        let cpu = 3.5;
+        if (f.resource && f.resource.average_cpu !== undefined && f.resource.average_cpu !== null) {
+          cpu = f.resource.average_cpu;
+        } else if (f.current_cpu !== undefined && f.current_cpu !== null) {
+          cpu = f.current_cpu;
+        }
+        cpuEl.value = parseFloat(cpu).toFixed(1);
+      }
+
+      runSandboxEvaluation();
+    }
+
+    function resetRiskSandbox() {
+      const envEl = document.getElementById('sim-env');
+      const topoEl = document.getElementById('sim-topo');
+      const actionEl = document.getElementById('sim-action');
+      const cpuEl = document.getElementById('sim-cpu');
+      const fleetEl = document.getElementById('sim-fleet-finding');
+
+      if (envEl) envEl.value = 'dev';
+      if (topoEl) topoEl.value = 'none';
+      if (actionEl) actionEl.value = 'release_ip';
+      if (cpuEl) cpuEl.value = '3.5';
+      if (fleetEl) fleetEl.value = '';
+
+      runSandboxEvaluation();
+    }
+
+    function loadRiskPreset(scenario) {
+      const envEl = document.getElementById('sim-env');
+      const topoEl = document.getElementById('sim-topo');
+      const actionEl = document.getElementById('sim-action');
+      const cpuEl = document.getElementById('sim-cpu');
+      const fleetEl = document.getElementById('sim-fleet-finding');
+      if (fleetEl) fleetEl.value = '';
+
+      if (scenario === 'high') {
+        if (envEl) envEl.value = 'production';
+        if (topoEl) topoEl.value = 'lb';
+        if (actionEl) actionEl.value = 'delete_volume';
+        if (cpuEl) cpuEl.value = '8.5';
+      } else if (scenario === 'medium') {
+        if (envEl) envEl.value = 'staging';
+        if (topoEl) topoEl.value = 'mount';
+        if (actionEl) actionEl.value = 'stop_instance';
+        if (cpuEl) cpuEl.value = '4.0';
+      } else if (scenario === 'low') {
+        if (envEl) envEl.value = 'dev';
+        if (topoEl) topoEl.value = 'none';
+        if (actionEl) actionEl.value = 'release_ip';
+        if (cpuEl) cpuEl.value = '1.5';
+      }
+      runSandboxEvaluation();
+    }
+
+    function runSandboxEvaluation() {
+      const envEl = document.getElementById('sim-env');
+      const topoEl = document.getElementById('sim-topo');
+      const actionEl = document.getElementById('sim-action');
+      const cpuEl = document.getElementById('sim-cpu');
+
+      if (!envEl || !topoEl || !actionEl || !cpuEl) return;
+
+      const env = envEl.value;
+      const topo = topoEl.value;
+      const action = actionEl.value;
+      const cpu = parseFloat(cpuEl.value) || 0.0;
+
+      // Update CPU badge
+      const cpuBadge = document.getElementById('sim-cpu-badge');
+      if (cpuBadge) {
+        if (cpu <= 2.0) {
+          cpuBadge.className = "px-2.5 py-2 rounded-lg text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono whitespace-nowrap";
+          cpuBadge.textContent = "Deep Idle (-5 pts)";
+        } else if (cpu < 8.0) {
+          cpuBadge.className = "px-2.5 py-2 rounded-lg text-xs font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-mono whitespace-nowrap";
+          cpuBadge.textContent = "Typical Idle (0 pts)";
+        } else if (cpu <= 10.0) {
+          cpuBadge.className = "px-2.5 py-2 rounded-lg text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono whitespace-nowrap";
+          cpuBadge.textContent = "Near Cutoff (+10 pts)";
+        } else {
+          cpuBadge.className = "px-2.5 py-2 rounded-lg text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30 font-mono whitespace-nowrap";
+          cpuBadge.textContent = "Active Load (+10 pts)";
+        }
+      }
+
+      // Factor 1: Environment Tag (Max 45)
+      let sEnv = 5;
+      if (env === 'production') sEnv = 45;
+      else if (env === 'staging') sEnv = 20;
+      else if (env === 'unknown') sEnv = 25;
+
+      // Factor 2: Topology (Max 35)
+      let sTopo = 0;
+      if (topo === 'lb') sTopo = 35;
+      else if (topo === 'mount') sTopo = 25;
+
+      // Factor 3: Proposed Action (Max 20)
+      let sAction = 5;
+      if (action === 'delete_volume') sAction = 20;
+      else if (action === 'stop_instance') sAction = 15;
+      else if (action === 'schedule_stop') sAction = 5;
+
+      // Factor 4: Telemetry Confidence (Max 10)
+      let sConf = 0;
+      if (cpu >= 8.0) sConf = 10;
+      else if (cpu <= 2.0) sConf = -5;
+
+      const totalScore = Math.max(0, Math.min(100, sEnv + sTopo + sAction + sConf));
+
+      const scoreEl = document.getElementById('sim-score');
+      if (scoreEl) scoreEl.textContent = totalScore.toFixed(1);
+
+      const badge = document.getElementById('sim-badge');
+      const routingDesc = document.getElementById('sim-routing-desc');
+      const meterLow = document.getElementById('meter-low');
+      const meterMed = document.getElementById('meter-med');
+      const meterHigh = document.getElementById('meter-high');
+      const labelLow = document.getElementById('tier-label-low');
+      const labelMed = document.getElementById('tier-label-med');
+      const labelHigh = document.getElementById('tier-label-high');
+
+      if (totalScore < 35) {
+        if (badge) {
+          badge.className = "px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+          badge.textContent = "LOW RISK";
+        }
+        if (routingDesc) routingDesc.textContent = "Eligible for automated zero-touch remediation. Zero customer disruption risk.";
+        if (meterLow) meterLow.className = "rounded-l-full bg-emerald-500 shadow-md shadow-emerald-500/40 border border-emerald-400 transition-all";
+        if (meterMed) meterMed.className = "bg-gray-800 border border-gray-700 opacity-40 transition-all";
+        if (meterHigh) meterHigh.className = "rounded-r-full bg-gray-800 border border-gray-700 opacity-40 transition-all";
+        if (labelLow) labelLow.className = "text-emerald-400 font-bold";
+        if (labelMed) labelMed.className = "text-gray-500";
+        if (labelHigh) labelHigh.className = "text-gray-500";
+      } else if (totalScore < 70) {
+        if (badge) {
+          badge.className = "px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-500/20 text-amber-400 border border-amber-500/30";
+          badge.textContent = "MEDIUM RISK";
+        }
+        if (routingDesc) routingDesc.textContent = "Routed to Governance Approval Queue. Mandatory human authorization required before executing.";
+        if (meterLow) meterLow.className = "rounded-l-full bg-gray-800 border border-gray-700 opacity-40 transition-all";
+        if (meterMed) meterMed.className = "bg-amber-500 shadow-md shadow-amber-500/40 border border-amber-400 transition-all";
+        if (meterHigh) meterHigh.className = "rounded-r-full bg-gray-800 border border-gray-700 opacity-40 transition-all";
+        if (labelLow) labelLow.className = "text-gray-500";
+        if (labelMed) labelMed.className = "text-amber-400 font-bold";
+        if (labelHigh) labelHigh.className = "text-gray-500";
+      } else {
+        if (badge) {
+          badge.className = "px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-500/20 text-rose-400 border border-rose-500/30";
+          badge.textContent = "HIGH RISK";
+        }
+        if (routingDesc) routingDesc.textContent = "CRITICAL BLAST RADIUS. Strictly enforces pre-action snapshot backup and human authorization.";
+        if (meterLow) meterLow.className = "rounded-l-full bg-gray-800 border border-gray-700 opacity-40 transition-all";
+        if (meterMed) meterMed.className = "bg-gray-800 border border-gray-700 opacity-40 transition-all";
+        if (meterHigh) meterHigh.className = "rounded-r-full bg-rose-500 shadow-md shadow-rose-500/40 border border-rose-400 transition-all";
+        if (labelLow) labelLow.className = "text-gray-500";
+        if (labelMed) labelMed.className = "text-gray-500";
+        if (labelHigh) labelHigh.className = "text-rose-400 font-bold";
+      }
+
+      const factorList = document.getElementById('sim-factors-list');
+      if (factorList) {
+        factorList.innerHTML = `
+          <div class="flex justify-between items-center py-1.5 border-b border-gray-800">
+            <span class="text-gray-400">1. Environment Impact (${env}):</span>
+            <b class="text-cyan-300 font-mono">+${sEnv} pts</b>
+          </div>
+          <div class="flex justify-between items-center py-1.5 border-b border-gray-800">
+            <span class="text-gray-400">2. Topology Dependency (${topo}):</span>
+            <b class="text-cyan-300 font-mono">+${sTopo} pts</b>
+          </div>
+          <div class="flex justify-between items-center py-1.5 border-b border-gray-800">
+            <span class="text-gray-400">3. Action Destructiveness (${action}):</span>
+            <b class="text-cyan-300 font-mono">+${sAction} pts</b>
+          </div>
+          <div class="flex justify-between items-center py-1.5">
+            <span class="text-gray-400">4. Telemetry Confidence (${cpu}% CPU):</span>
+            <b class="${sConf < 0 ? 'text-emerald-400' : (sConf > 0 ? 'text-amber-400' : 'text-gray-400')} font-mono">${sConf >= 0 ? '+' : ''}${sConf} pts</b>
+          </div>
+        `;
+      }
+    }
+  </script>
+</body>
+</html>
