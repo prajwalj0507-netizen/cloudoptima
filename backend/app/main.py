@@ -109,21 +109,3 @@ if os.path.exists(static_dir):
     @app.get("/layer7", include_in_schema=False)
     def serve_layer7():
         return FileResponse(os.path.join(static_dir, "layer7.html"))
-
-    @app.get("/doc", include_in_schema=False)
-    def serve_doc():
-        return FileResponse(os.path.join(static_dir, "CloudOptima_Architecture_Design_Document.html"))
-
-    @app.get("/presentation", include_in_schema=False)
-    def serve_presentation():
-        return FileResponse(os.path.join(static_dir, "CloudOptima_Presentation.html"))
-
-    @app.get("/download/docx", include_in_schema=False)
-    def download_docx():
-        f = os.path.join(static_dir, "CloudOptima_Architecture_Design_Document.docx")
-        return FileResponse(f, media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document", filename="CloudOptima_Architecture_Design_Document.docx")
-
-    @app.get("/download/pptx", include_in_schema=False)
-    def download_pptx():
-        f = os.path.join(static_dir, "CloudOptima_Project_Presentation.pptx")
-        return FileResponse(f, media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation", filename="CloudOptima_Project_Presentation.pptx")
