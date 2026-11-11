@@ -1,0 +1,13 @@
+"$schema" = "https://open-api.netlify.com/netlify.schema.json"
+
+[build]
+  publish = "backend/app/static"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+[[redirects]]
+  from = "/static/*"
+  to = "/:splat"
+  status = 200

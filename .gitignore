@@ -39,3 +39,7 @@ desktop.ini
 verify_all.py
 test_server_api.py
 probe_server.py
+
+# Netlify & Node
+.netlify/
+node_modules/

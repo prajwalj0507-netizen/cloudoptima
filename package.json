@@ -1,0 +1,9 @@
+{
+  "name": "cloudoptima-netlify",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CloudOptima Multi-Cloud Waste Detection & Risk Governance Platform (Netlify Serverless Adapter)",
+  "dependencies": {
+    "@netlify/blobs": "^8.1.0"
+  }
+}
